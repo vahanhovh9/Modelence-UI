@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { assets } from '../assets';
 
 type IconSpec = {
@@ -11,20 +12,67 @@ type IconSpec = {
 };
 
 /**
+ * Figma bakes a fixed colour into every export (the Sandbox cube came out white
+ * because it was the selected one, Prod's bolt grey because it was not), which
+ * survives neither selection nor a theme change. Painting the glyph as a mask
+ * over `currentColor` instead lets CSS drive it.
+ */
+export function maskStyle(src: string, extra?: CSSProperties): CSSProperties {
+  return {
+    maskImage: `url(${src})`,
+    WebkitMaskImage: `url(${src})`,
+    maskRepeat: 'no-repeat',
+    WebkitMaskRepeat: 'no-repeat',
+    maskSize: 'contain',
+    WebkitMaskSize: 'contain',
+    maskPosition: 'center',
+    WebkitMaskPosition: 'center',
+    ...extra,
+  };
+}
+
+/**
  * Figma exports icon glyphs without their surrounding frame, so each one has to
  * be re-seated inside a fixed-size box using the insets from the design file.
  * Both dimensions are always explicit — an `auto` here blows the SVG up to its
  * intrinsic size.
  */
-export function VectorIcon({ src, size, inset, bleed = '0', className = '' }: IconSpec & { className?: string }) {
+export function VectorIcon({
+  src,
+  size,
+  inset,
+  bleed = '0',
+  className = '',
+  tinted = true,
+}: IconSpec & { className?: string; tinted?: boolean }) {
   return (
     <div className={`relative shrink-0 overflow-clip ${className}`} style={{ width: size, height: size }}>
       <div className="absolute" style={{ inset }}>
         <div className="absolute" style={{ inset: bleed }}>
-          <img src={src} alt="" className="block size-full max-w-none" />
+          {tinted ? (
+            <span
+              aria-hidden
+              className="block size-full bg-current"
+              // Matches the untinted <img>, which stretches to fill the box.
+              style={maskStyle(src, { maskSize: '100% 100%', WebkitMaskSize: '100% 100%' })}
+            />
+          ) : (
+            <img src={src} alt="" className="block size-full max-w-none" />
+          )}
         </div>
       </div>
     </div>
+  );
+}
+
+/** For plain standalone SVGs that need no inset framing. */
+export function MaskIcon({ src, size = 16, className = '' }: { src: string; size?: number; className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={`block shrink-0 bg-current ${className}`}
+      style={{ width: size, height: size, ...maskStyle(src) }}
+    />
   );
 }
 

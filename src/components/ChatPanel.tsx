@@ -1,124 +1,182 @@
+import { useEffect, useRef, useState } from 'react';
 import { assets } from '../assets';
-import { VectorIcon, icons } from './VectorIcon';
+import { useFakeAgent } from '../agent/useFakeAgent';
+import type { Version } from '../version';
+import { TurnView } from './AgentTurn';
+import { Dropdown, MenuItem } from './Dropdown';
+import { MaskIcon, VectorIcon, icons } from './VectorIcon';
 
-const FIRST_TRANSCRIPT = [
-  "Let me verify what's actually on disk.",
-  'Bash Show working tree diff',
-  'IN',
-  'git diff --stat && echo "=== diff ===" && git diff',
-  'OUT',
-  ' src/client/app-builder/ChatInput.tsx | 2 +- src/client/index.css                 | 1 + 2 files changed, 2 insertions(+), 1 deletion(-) === diff === diff --git a/src/client/app-builder/ChatInput.tsx b/src/client/app-builder/',
-];
+const MODELS = ['Fable', 'Opus 5', 'Sonnet 5', 'Haiku 4.5'];
 
-const SECOND_TRANSCRIPT = [
-  "Let me verify what's actually on disk.",
-  'Bash Show working tree diff',
-  '​',
-  'IN',
-  '​',
-  'git diff --stat && echo "=== diff ===" && git diffChatInput.tsx b/src/client/app-builder/',
-];
+export function ChatPanel({ width, version }: { width: number; version: Version }) {
+  const isV2 = version === 'v2';
+  const surface = isV2 ? '--color-app' : '--color-panel';
+  const { turns, busy, elapsed, send, stop } = useFakeAgent();
+  const [message, setMessage] = useState('');
+  const [model, setModel] = useState(MODELS[0]);
+  const [scrolled, setScrolled] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-function Transcript({ lines, className = '' }: { lines: readonly string[]; className?: string }) {
+  const canSend = message.trim().length > 0 && !busy;
+
+  // Follow the transcript as it streams.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
+    setScrolled(el.scrollTop > 2);
+  }, [turns, elapsed]);
+
+  const submit = () => {
+    if (!canSend) return;
+    send(message);
+    setMessage('');
+  };
+
   return (
-    <div className={`text-[13px] whitespace-pre-wrap break-words text-grey-300 ${className}`}>
-      {lines.map((line, index) => (
-        <p key={index} className="leading-[20px]">
-          {line}
-        </p>
-      ))}
-    </div>
-  );
-}
-
-function Composer() {
-  return (
-    <div className="flex w-[263px] shrink-0 flex-col gap-[88px] overflow-clip rounded-[12px] border border-grey-500 bg-black p-[8px]">
-      <textarea
-        rows={1}
-        placeholder="Write a message..."
-        className="w-full resize-none bg-transparent text-[13px] font-medium text-white placeholder:text-grey-400 focus:outline-none"
-      />
-      <div className="flex w-full shrink-0 items-center justify-between">
-        <div className="flex shrink-0 items-center gap-[13px]">
-          {/* Negative margin cancels the padding, so the hover target grows without moving the icon. */}
-          <button
-            type="button"
-            aria-label="Attach a file"
-            className="-m-[6px] shrink-0 rounded-(--radius-small) p-[6px] transition-colors hover:bg-white/10"
-          >
-            <span className="relative block size-[16px]">
-              <img src={assets.iconAttach} alt="" className="absolute inset-0 block size-full max-w-none" />
-            </span>
-          </button>
-          <button
-            type="button"
-            className="group -mx-[4px] flex h-[20px] shrink-0 items-center gap-[6px] rounded-(--radius-small) px-[4px] transition-colors hover:bg-white/10"
-          >
-            <span className="flex shrink-0 items-end gap-[2px]">
-              <span className="text-[12px] font-medium whitespace-nowrap text-grey-400 transition-colors group-hover:text-grey-200">
-                Fable
-              </span>
-              <VectorIcon {...icons.chevronDownModel} className="-top-[4px]" />
-            </span>
-          </button>
-        </div>
-        <div className="flex shrink-0 items-center gap-[9px]">
-          <button
-            type="button"
-            aria-label="Stop generating"
-            className="-m-[6px] shrink-0 rounded-(--radius-small) p-[6px] transition-colors hover:bg-white/10"
-          >
-            <span className="relative block size-[15px]">
-              <span className="absolute -inset-y-[0.7%] -right-[0.7%] left-0">
-                <img src={assets.iconStop} alt="" className="block size-full max-w-none" />
-              </span>
-            </span>
-          </button>
-          <button
-            type="button"
-            aria-label="Send message"
-            className="flex size-[24px] shrink-0 items-center justify-center rounded-[8px] bg-grey-600 transition-colors hover:bg-grey-500"
-          >
-            <VectorIcon {...icons.arrowUp} />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export function ChatPanel() {
-  return (
-    <section className="flex h-full w-[287px] shrink-0 flex-col items-center justify-between rounded-l-[12px] border border-grey-700 bg-grey-800 p-[12px]">
-      {/* Scrolls so the composer stays pinned once the transcript outgrows the panel. */}
-      <div className="flex w-full min-h-0 flex-1 flex-col items-start gap-[16px] overflow-y-auto">
-        <div className="flex shrink-0 flex-col items-start gap-[4px]">
-          {/* Fixed at 220px in Figma; min-height instead so a fallback font cannot clip it. */}
-          <Transcript lines={FIRST_TRANSCRIPT} className="min-h-[220px] w-[254px]" />
-          <div className="flex shrink-0 items-center gap-[4px]">
-            <VectorIcon {...icons.check} />
-            <span className="text-[13px] leading-[20px] whitespace-nowrap text-white">worked for 1m 15 s</span>
-          </div>
+    <section
+      style={{ width }}
+      className={`flex h-full shrink-0 flex-col items-center justify-between ${
+        isV2 ? 'px-[10px] pt-[13px] pb-[13px]' : 'rounded-l-[12px] border border-border bg-panel p-[12px]'
+      }`}
+    >
+      <div className="relative min-h-0 w-full flex-1">
+        {/* Scrolls so the composer stays pinned once the transcript outgrows the panel. */}
+        <div
+          ref={scrollRef}
+          onScroll={(event) => setScrolled(event.currentTarget.scrollTop > 2)}
+          className="flex h-full w-full flex-col items-start gap-[16px] overflow-y-auto"
+        >
+          {turns.map((turn) => (
+            <TurnView key={turn.id} turn={turn} elapsed={elapsed} bullets={isV2} />
+          ))}
         </div>
 
-        <div className="flex w-[261px] shrink-0 items-center justify-center rounded-[8px] border border-purple-300 bg-purple-400 px-[12px] py-[8px]">
-          <p className="min-w-px flex-1 text-[13px] leading-[20px] text-white">
-            Nice. Can you highlight today and show a couple of sample events?
-          </p>
-        </div>
-
-        <div className="flex shrink-0 items-start gap-[8px]">
-          <div className="flex shrink-0 items-center pt-[7px]">
-            <div className="relative h-[105px] w-[5px] shrink-0">
-              <img src={assets.thinkingRail} alt="" className="absolute inset-0 block size-full max-w-none" />
-            </div>
-          </div>
-          <Transcript lines={SECOND_TRANSCRIPT} className="w-[242px]" />
-        </div>
+        {/*
+          Softens the top edge once content scrolls under it, so text dissolves
+          into the panel instead of ending on a hard cut. The mask fades the
+          blur out downward; the gradient carries the panel colour with it.
+        */}
+        <div
+          aria-hidden
+          className={`pointer-events-none absolute inset-x-0 top-0 h-[30px] transition-opacity duration-200 ${
+            scrolled ? 'opacity-100' : 'opacity-0'
+          }`}
+          style={{
+            backdropFilter: 'blur(4px)',
+            WebkitBackdropFilter: 'blur(4px)',
+            // V2 has no panel fill, so the fade blends into the page instead.
+            background: `linear-gradient(to bottom, var(${surface}) 15%, color-mix(in srgb, var(${surface}) 45%, transparent) 60%, transparent 100%)`,
+            maskImage: 'linear-gradient(to bottom, black 0%, black 40%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 40%, transparent 100%)',
+          }}
+        />
       </div>
 
-      <Composer />
+      <div
+        // The textarea fills the writing area, and this catches the padding
+        // around it — so a click anywhere outside the toolbar starts typing.
+        onMouseDown={(event) => {
+          if (event.target === event.currentTarget) {
+            event.preventDefault();
+            textareaRef.current?.focus();
+          }
+        }}
+        // No overflow-clip: the model menu opens upward out of this box.
+        className={`mt-[12px] flex w-full shrink-0 cursor-text flex-col gap-[8px] rounded-[12px] border border-border-strong bg-field ${
+          isV2 ? 'p-[10px]' : 'p-[8px]'
+        }`}
+      >
+        <textarea
+          ref={textareaRef}
+          value={message}
+          onChange={(event) => setMessage(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+              event.preventDefault();
+              submit();
+            }
+          }}
+          placeholder="Write a message..."
+          className="h-[96px] w-full resize-none bg-transparent text-[13px] font-medium text-text placeholder:text-text-muted focus:outline-none"
+        />
+        <div className="flex w-full shrink-0 items-center justify-between">
+          <div className="flex shrink-0 items-center gap-[13px]">
+            {/* Negative margin cancels the padding, so the hover target grows without moving the icon. */}
+            <button
+              type="button"
+              aria-label="Attach a file"
+              className="-m-[6px] shrink-0 rounded-(--radius-small) p-[6px] text-text-muted transition-colors hover:bg-hover hover:text-text-secondary"
+            >
+              <MaskIcon src={assets.iconAttach} />
+            </button>
+            <Dropdown
+              placement="top-start"
+              panelWidth="w-[152px]"
+              trigger={({ open, toggle }) => (
+                <button
+                  type="button"
+                  onClick={toggle}
+                  aria-expanded={open}
+                  className="group -mx-[4px] flex h-[20px] shrink-0 items-center gap-[6px] rounded-(--radius-small) px-[4px] text-text-muted transition-colors hover:bg-hover hover:text-text-secondary"
+                >
+                  <span className="flex shrink-0 items-end gap-[2px]">
+                    <span className="text-[12px] font-medium whitespace-nowrap">{model}</span>
+                    <VectorIcon
+                      {...icons.chevronDownModel}
+                      className={`-top-[2px] transition-transform ${open ? 'rotate-180' : ''}`}
+                    />
+                  </span>
+                </button>
+              )}
+            >
+              {({ close }) =>
+                MODELS.map((name) => (
+                  <MenuItem
+                    key={name}
+                    label={name}
+                    selected={name === model}
+                    onClick={() => {
+                      setModel(name);
+                      close();
+                    }}
+                  />
+                ))
+              }
+            </Dropdown>
+          </div>
+          <div className="flex shrink-0 items-center gap-[9px]">
+            <button
+              type="button"
+              aria-label="Stop generating"
+              onClick={stop}
+              disabled={!busy}
+              className={`-m-[6px] shrink-0 rounded-(--radius-small) p-[6px] text-text-muted transition-all hover:bg-hover ${
+                busy ? 'opacity-100' : 'opacity-40'
+              }`}
+            >
+              <span className={busy ? 'block animate-spin [animation-duration:1.4s]' : 'block'}>
+                <MaskIcon src={assets.iconStop} size={15} />
+              </span>
+            </button>
+            {/* Once there is something to send, this takes on the Publish button's treatment. */}
+            <button
+              type="button"
+              aria-label="Send message"
+              onClick={submit}
+              disabled={!canSend}
+              className={`flex size-[24px] shrink-0 items-center justify-center transition-colors ${isV2 ? 'rounded-[7px]' : 'rounded-[8px]'} ${
+                canSend
+                  ? 'border border-publish-border bg-publish text-publish-text hover:bg-publish-hover'
+                  : 'bg-send text-text-secondary hover:bg-control-hover'
+              }`}
+            >
+              <VectorIcon {...icons.arrowUp} />
+            </button>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }

@@ -10,6 +10,12 @@ export const assets = {
   thinkingRail: '/assets/thinking-rail.svg',
 
   iconBox: '/assets/icon-box.svg',
+  /** From the project's own icon set — the only unused environment glyph. */
+  iconRocket: '/assets/icon-rocket.svg',
+  /** Figma node 307:641, the Play glyph on Page 2. */
+  iconPlay: '/assets/icon-play.svg',
+  iconThemeDark: '/assets/icon-theme-dark.svg',
+  iconThemeBright: '/assets/icon-theme-bright.svg',
   iconZapRail: '/assets/icon-zap-rail.svg',
   iconZapUpgrade: '/assets/icon-zap-upgrade.svg',
   iconPlus: '/assets/icon-plus.svg',

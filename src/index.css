@@ -2,31 +2,60 @@
 @import 'tailwindcss';
 
 /*
- * Design tokens from Figma: Exploration / Desktop - 4 (node 112:481).
- * Names mirror the Figma variable collections (greys/*, purples/*, accents/*)
- * so the mapping back to the design file stays obvious.
+ * Design tokens from Figma: Exploration.
+ *   Dark   — Desktop - 4 (node 112:481)
+ *   Bright — Desktop - 5 (node 112:591)
+ *
+ * Tokens are named by ROLE, not by value. A value swap would not work: the same
+ * dark colour maps to different bright ones depending on where it is used
+ * (black is #ffffff on the composer but #f8f8f8 on the segmented track; grey-600
+ * is #ffffff on the rail button but #ededed on the send button).
+ *
+ * Dark is the default; :root[data-theme='bright'] below overrides it.
  */
 @theme {
-  --color-grey-0: #ffffff;
-  --color-grey-100: #e2e2e2;
-  --color-grey-200: #c9c9c9;
-  --color-grey-300: #8b8b8b;
-  --color-grey-400: #656565;
-  --color-grey-500: #484848;
-  --color-grey-600: #363636;
-  --color-grey-700: #2f2f2f;
-  --color-grey-750: #292929;
-  --color-grey-780: #3d3d3d;
-  --color-grey-800: #232323;
-  --color-grey-900: #0e0e0e;
-  --color-grey-1000: #000000;
+  /* Surfaces */
+  --color-app: #0e0e0e;
+  --color-panel: #232323;
+  --color-menu: #232323;
+  --color-track: #000000;
+  --color-field: #000000;
+  --color-chip: #292929;
+  --color-control: #363636;
+  --color-control-hover: #484848;
+  --color-pill: #3d3d3d;
+  --color-send: #363636;
+  --color-canvas: #ffffff;
 
-  --color-purple-300: #5e5194;
-  --color-purple-400: #373445;
-  --color-purple-brand: #570cd9;
-  --color-lavender-300: #d2b8ff;
+  /* Borders */
+  --color-border: #2f2f2f;
+  --color-border-strong: #484848;
+  --color-border-chip: #484848;
+  --color-canvas-border: #e2e2e2;
+  /* V2 drops the outline on the segmented track and page selector. */
+  --color-track-border: #2f2f2f;
 
+  /* Text */
+  --color-text: #ffffff;
+  --color-text-secondary: #c9c9c9;
+  --color-text-body: #8b8b8b;
+  --color-text-muted: #656565;
+  --color-text-faint: #656565;
+
+  /* Accents */
+  --color-bubble: #373445;
+  --color-bubble-border: #5e5194;
+  --color-bubble-text: #ffffff;
+  --color-publish: #d2b8ff;
+  --color-publish-hover: #e1cfff;
+  --color-publish-text: #000000;
+  --color-publish-border: rgba(255, 255, 255, 0.4);
+  --color-badge-text: #ffffff;
+  --color-brand: #570cd9;
   --color-accent-green: #34c759;
+
+  /* Translucent hover wash, inverted per theme. */
+  --color-hover: rgba(255, 255, 255, 0.1);
 
   --radius-small: 6px;
 
@@ -40,10 +69,136 @@
     'Segoe UI', sans-serif;
 }
 
-html,
-body,
-#root {
-  height: 100%;
+/* Unlayered, so it overrides the @theme defaults that Tailwind emits on :root. */
+:root[data-theme='bright'] {
+  --color-app: #ededed;
+  --color-panel: #f8f8f8;
+  --color-menu: #ffffff;
+  --color-track: #f8f8f8;
+  --color-field: #ffffff;
+  --color-chip: #ffffff;
+  --color-control: #ffffff;
+  --color-control-hover: #e8e8e8;
+  --color-pill: #ffffff;
+  --color-send: #ededed;
+
+  --color-border: #e2e2e2;
+  --color-border-strong: #e2e2e2;
+  --color-border-chip: #cecece;
+
+  --color-text: #000000;
+  --color-text-secondary: #454545;
+  --color-text-body: #676565;
+  --color-text-muted: #7a7a7a;
+  --color-text-faint: #656565;
+
+  --color-bubble: #e5e0fe;
+  --color-bubble-border: #c3b4ff;
+  --color-bubble-text: #000000;
+  --color-publish: #782bff;
+  --color-publish-hover: #8f4dff;
+  --color-publish-text: #ffffff;
+  --color-publish-border: transparent;
+  --color-badge-text: #000000;
+
+  --color-hover: rgba(0, 0, 0, 0.06);
+  --color-track-border: #e2e2e2;
+
+  color-scheme: light;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+/*
+ * Version 2 — Figma "Desktop - 2" (node 98:263). A flat variant: no panel
+ * cards, hairline rules instead, a neutral Publish and a grey user bubble.
+ * Declared after the bright block, so every token bright touches is restated
+ * in the v2+bright pair below rather than left to selector ordering.
+ */
+:root[data-version='v2'] {
+  --color-app: #121212;
+  --color-panel: transparent;
+  --color-track: #000000;
+  --color-track-border: transparent;
+  --color-field: #000000;
+  --color-chip: #292929;
+  --color-control: #363636;
+  --color-send: #363636;
+  --color-pill: #3d3d3d;
+
+  --color-border: #373737;
+  --color-border-strong: #363636;
+  --color-border-chip: #373737;
+
+  --color-text-muted: #7a7a7a;
+
+  --color-bubble: #363636;
+  --color-bubble-border: #484848;
+  --color-bubble-text: #ffffff;
+  --color-publish: #cfcfcf;
+  --color-publish-hover: #dedede;
+  --color-publish-text: #000000;
+  --color-publish-border: #ffffff;
+  --color-accent-green: #24c763;
+}
+
+/*
+ * Version 2, bright. Figma has no bright frame for this version, so it is
+ * derived: every role keeps the relationship it has in v2 dark (the track sits
+ * darker than the page, the chip lighter than the track, Publish stays a
+ * neutral high-contrast pill rather than the brand purple).
+ */
+:root[data-version='v2'][data-theme='bright'] {
+  --color-app: #f4f4f4;
+  --color-panel: transparent;
+  --color-menu: #ffffff;
+  --color-track: #e4e4e4;
+  --color-track-border: transparent;
+  --color-field: #ffffff;
+  --color-chip: #ffffff;
+  --color-control: #ffffff;
+  --color-control-hover: #e8e8e8;
+  --color-send: #ededed;
+  --color-pill: #ffffff;
+
+  --color-border: #dcdcdc;
+  --color-border-strong: #dcdcdc;
+  --color-border-chip: #cecece;
+
+  --color-text: #000000;
+  --color-text-secondary: #454545;
+  --color-text-body: #676565;
+  --color-text-muted: #7a7a7a;
+  --color-text-faint: #656565;
+
+  --color-bubble: #ffffff;
+  --color-bubble-border: #e2e2e2;
+  --color-bubble-text: #000000;
+  --color-publish: #1f1f1f;
+  --color-publish-hover: #333333;
+  --color-publish-text: #ffffff;
+  --color-publish-border: transparent;
+  --color-badge-text: #000000;
+
+  --color-hover: rgba(0, 0, 0, 0.06);
+
+  color-scheme: light;
+}
+
+/* Indeterminate progress bar for the preview reload. */
+@keyframes loadbar {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(350%);
+  }
+}
+
+@utility animate-loadbar {
+  animation: loadbar 1.1s ease-in-out infinite;
 }
 
 /* Tailwind v4 drops the UA pointer cursor on buttons; put it back. */
@@ -52,9 +207,15 @@ button:not(:disabled),
   cursor: pointer;
 }
 
+html,
+body,
+#root {
+  height: 100%;
+}
+
 body {
   margin: 0;
-  background-color: var(--color-grey-900);
+  background-color: var(--color-app);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
