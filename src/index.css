@@ -93,6 +93,21 @@
   --color-danger: #ff6467;
   --color-danger-hover: #ff8285;
   --color-green-800: #063d14;
+  /*
+   * The Code editor is the one surface that does not follow the theme switch:
+   * an editor keeps its dark canvas on a bright page, so its ground and syntax
+   * colours are pinned here and never redefined per mode. Its file column is
+   * ordinary chrome and does follow the theme.
+   */
+  --color-code-canvas: #0e0e0e;
+  --color-code-line: #242424;
+  --color-code-plain: #e4e6ea;
+  --color-code-muted: #737884;
+  --color-code-key: #f8c41a;
+  --color-code-string: #4af075;
+  --color-code-number: #ff6467;
+  --color-code-keyword: #a78bfa;
+
   /* The build-log terminal keeps its own dark ground in both themes. */
   --color-terminal: #12141a;
   --color-terminal-line: #4a5160;

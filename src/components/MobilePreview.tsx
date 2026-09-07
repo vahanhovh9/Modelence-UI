@@ -109,13 +109,17 @@ function PhoneScreen() {
   );
 }
 
+/**
+ * The handset fills the pane's height and takes its width from the 9:19 ratio,
+ * so the device grows with the window instead of sitting at one fixed size.
+ */
 function Phone() {
   return (
     <div
-      className="shrink-0 rounded-[42px] p-[10px]"
-      style={{ background: BEZEL, width: 272, boxShadow: '0 24px 60px rgba(0,0,0,0.35)' }}
+      className="h-full max-w-full shrink-0 rounded-[42px] p-[10px]"
+      style={{ background: BEZEL, aspectRatio: '9 / 19', boxShadow: '0 24px 60px rgba(0,0,0,0.35)' }}
     >
-      <div className="aspect-[9/19] w-full overflow-clip rounded-[32px]">
+      <div className="size-full overflow-clip rounded-[32px]">
         <PhoneScreen />
       </div>
     </div>
@@ -195,7 +199,7 @@ function QrCode() {
 
 function PreviewCard() {
   return (
-    <div className="flex w-full max-w-[320px] min-w-[264px] shrink-0 flex-col gap-[14px] rounded-main border border-border-main bg-bg-primary p-[20px]">
+    <div className="flex w-[320px] shrink-0 flex-col gap-[14px] self-start rounded-main border border-border-main bg-bg-primary p-[20px]">
       <div className="flex items-center justify-between gap-[12px]">
         <h3 className="text-h3 text-text-selected">Preview on your phone</h3>
         <StatusBadge label="Running" />
@@ -236,12 +240,19 @@ export function MobilePreview({ version }: { version: Version }) {
   const isV2 = version === 'v2';
   return (
     <div
-      className={`h-full min-w-0 flex-1 overflow-y-auto bg-bg-container ${
+      className={`h-full min-w-0 flex-1 overflow-hidden bg-bg-container ${
         isV2 ? '' : 'rounded-block border border-border-main'
       }`}
     >
-      <div className="mx-auto flex w-full max-w-[720px] flex-wrap items-start justify-center gap-[28px] px-[24px] py-[32px]">
-        <Phone />
+      {/*
+        The padding lives here so the phone can measure itself against the
+        remaining height, and the card sits flush against the container's right
+        edge rather than being centred with it.
+      */}
+      <div className="flex h-full w-full items-stretch gap-[24px] p-[24px]">
+        <div className="flex min-w-px flex-1 items-stretch justify-center">
+          <Phone />
+        </div>
         <PreviewCard />
       </div>
     </div>
