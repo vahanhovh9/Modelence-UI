@@ -4,6 +4,7 @@ import { MoreDots } from './Dropdown';
 import { Icon } from './Icon';
 import { StatusBadge } from './StatusBadge';
 import { HeadCell, IconCta, Scroller, TableHead, TableRow, TableSection } from './ConsoleTable';
+import { inSync, type Env } from '../environment';
 
 type StoredFile = { path: string; size: string; modified: string };
 
@@ -23,6 +24,12 @@ const FILES: StoredFile[] = [
   { path: 'exports/monthly-usage-2026-07.csv', size: '12 KB', modified: 'Aug 1, 2026' },
   { path: 'branding/logo-mark.svg', size: '4 KB', modified: 'Aug 3, 2026' },
 ];
+
+/**
+ * What Prod's bucket held at deployment #183 — the same objects minus anything
+ * uploaded since. A deploy ships the bucket, so this catches up on Deploy.
+ */
+const DEPLOYED = 9;
 
 /**
  * How much of the name survives. A row has the width for the folder plus a
@@ -87,7 +94,13 @@ function FileGlyph({ size = 16 }: { size?: number }) {
   );
 }
 
-function RowMenu() {
+/**
+ * Prod is read-only — you edit in Sandbox and deploy — so the row menu, which
+ * renames and deletes, gives way to the space it occupied. The column keeps its
+ * width either way so the table does not reflow between environments.
+ */
+function RowMenu({ readOnly }: { readOnly: boolean }) {
+  if (readOnly) return <span className="w-[24px] shrink-0" />;
   return (
     <span className="flex size-[24px] shrink-0 items-center justify-center rounded-small text-icon-default transition-colors hover:bg-hover hover:text-icon-selected">
       <MoreDots />
@@ -98,11 +111,11 @@ function RowMenu() {
 /** Columns are fixed so the header and every row line up under a scroll. */
 const COLS = {
   size: 'w-[88px] shrink-0',
-  visibility: 'w-[104px] shrink-0',
+  visibility: 'flex w-[104px] shrink-0 items-center',
   modified: 'w-[112px] shrink-0',
 };
 
-function ListView() {
+function ListView({ files, readOnly }: { files: StoredFile[]; readOnly: boolean }) {
   return (
     <Scroller min="min-w-[620px]">
       <TableHead>
@@ -113,7 +126,7 @@ function ListView() {
         <span className="w-[24px] shrink-0" />
       </TableHead>
 
-      {FILES.map((file) => (
+      {files.map((file) => (
         <TableRow key={file.path}>
           <span className="flex min-w-px flex-1 items-center gap-[10px]">
             <FileGlyph />
@@ -124,17 +137,17 @@ function ListView() {
             <Private />
           </span>
           <span className={`text-body text-text-main ${COLS.modified}`}>{file.modified}</span>
-          <RowMenu />
+          <RowMenu readOnly={readOnly} />
         </TableRow>
       ))}
     </Scroller>
   );
 }
 
-function GridView() {
+function GridView({ files, readOnly }: { files: StoredFile[]; readOnly: boolean }) {
   return (
     <div className="grid w-full grid-cols-2 gap-[12px] pb-[16px] md:grid-cols-3 xl:grid-cols-4">
-      {FILES.map((file) => (
+      {files.map((file) => (
         <div
           key={file.path}
           className="flex flex-col gap-[8px] rounded-main border border-border-main bg-bg-primary p-[10px] transition-colors hover:border-border-highlight"
@@ -144,7 +157,7 @@ function GridView() {
           </span>
           <span className="flex items-center gap-[6px]">
             <FileName path={file.path} variant="tile" />
-            <RowMenu />
+            <RowMenu readOnly={readOnly} />
           </span>
           <span className="flex items-center justify-between gap-[8px]">
             <span className="text-small-title text-text-secondary">{file.size}</span>
@@ -189,8 +202,10 @@ function ViewSwitcher({ value, onChange }: { value: 'list' | 'grid'; onChange: (
 }
 
 /** The Files section of the environment console — one card, header and all. */
-export function FilesView() {
+export function FilesView({ env = 'sandbox', deployed = true }: { env?: Env; deployed?: boolean }) {
   const [view, setView] = useState<'list' | 'grid'>('list');
+  const files = inSync(env, deployed) ? FILES : FILES.slice(0, DEPLOYED);
+  const readOnly = env === 'prod';
 
   return (
     <TableSection
@@ -200,11 +215,15 @@ export function FilesView() {
         // control and the CTA as the action.
         <span className="flex items-center gap-[16px]">
           <ViewSwitcher value={view} onChange={setView} />
-          <IconCta icon={<Icon src={assets.upload} size={14} />} label="Upload file" />
+          {!readOnly && <IconCta icon={<Icon src={assets.upload} size={14} />} label="Upload file" />}
         </span>
       }
     >
-      {view === 'list' ? <ListView /> : <GridView />}
+      {view === 'list' ? (
+        <ListView files={files} readOnly={readOnly} />
+      ) : (
+        <GridView files={files} readOnly={readOnly} />
+      )}
     </TableSection>
   );
 }

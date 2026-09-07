@@ -94,12 +94,10 @@
   --color-danger-hover: #ff8285;
   --color-green-800: #063d14;
   /*
-   * The Code editor is the one surface that does not follow the theme switch:
-   * an editor keeps its dark canvas on a bright page, so its ground and syntax
-   * colours are pinned here and never redefined per mode. Its file column is
-   * ordinary chrome and does follow the theme.
+   * The Code section is the one that does not follow the usual roles: it sits
+   * on Bg canvas rather than Bg container, and its syntax ramp is its own —
+   * tuned for a full-bleed editor ground rather than for body text.
    */
-  --color-code-canvas: #0e0e0e;
   --color-code-line: #242424;
   --color-code-plain: #e4e6ea;
   --color-code-muted: #737884;
@@ -227,6 +225,15 @@
   --color-button-secondary-text: #0e0e0e;
 
   --color-main: #2f2f2f;
+
+  /* The Code section's ramp, restated for a light editor ground. */
+  --color-code-line: #e8e6e6;
+  --color-code-plain: #1f2430;
+  --color-code-muted: #8b8f98;
+  --color-code-key: #b45309;
+  --color-code-string: #0a7d32;
+  --color-code-number: #b91c1c;
+  --color-code-keyword: #6d28d9;
 
   --color-bg-primary: #ffffff;
   --color-bg-selected-2: #edeceb;

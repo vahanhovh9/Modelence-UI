@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { assets } from '../assets';
 import { Icon } from './Icon';
+import { inSync, type Env } from '../environment';
 
 /* ------------------------------------------------------------ the project */
 
@@ -130,6 +131,35 @@ export default defineConfig({ plugins: [react()] });
 const SELECTED = 'user-app/.cursor/mcp.json';
 /** Folders the explorer opens on: everything on the path to the selected file. */
 const OPEN = ['user-app', 'user-app/.cursor', 'user-app/.modelence', 'user-app/src'];
+
+/*
+ * Prod is running deployment #183, which predates the editor config and the
+ * mobile target — and its CalendarApp still passes the year as a string. A
+ * deploy ships the source, so Deploying brings all of this up to Sandbox.
+ */
+const NOT_DEPLOYED = ['user-app/.cursor', 'user-app/mobile'];
+const OLD_SOURCE: Record<string, string> = {
+  'user-app/src/client/CalendarApp.tsx': `// CalendarApp.tsx
+
+export default function CalendarApp() {
+  return <MonthGrid month="July" />;
+}
+`,
+};
+const PROD_SELECTED = 'user-app/src/client/CalendarApp.tsx';
+const PROD_OPEN = ['user-app', 'user-app/.modelence', 'user-app/src', 'user-app/src/client'];
+
+/** The tree as the given environment has it, pruned and rolled back in place. */
+function project(nodes: Node[], deployed: boolean, path = ''): Node[] {
+  if (deployed) return nodes;
+  return nodes.flatMap((node) => {
+    const here = path ? `${path}/${node.name}` : node.name;
+    if (NOT_DEPLOYED.includes(here)) return [];
+    if (node.children) return [{ ...node, children: project(node.children, deployed, here) }];
+    const older = OLD_SOURCE[here];
+    return [older ? { ...node, body: older } : node];
+  });
+}
 
 /* ------------------------------------------------------------ highlighting */
 
@@ -269,12 +299,17 @@ function find(nodes: Node[], parts: string[]): Node | undefined {
  * and the editor are a single control — picking a file swaps the breadcrumb
  * and the source, so it reads as an editor rather than a screenshot of one.
  */
-export function CodeView() {
-  const [open, setOpen] = useState(() => new Set(OPEN));
-  const [selected, setSelected] = useState(SELECTED);
+export function CodeView({ env = 'sandbox', deployed = true }: { env?: Env; deployed?: boolean }) {
+  const synced = inSync(env, deployed);
+  const [open, setOpen] = useState(() => new Set(synced ? OPEN : PROD_OPEN));
+  const [selected, setSelected] = useState(synced ? SELECTED : PROD_SELECTED);
 
-  const parts = selected.split('/');
-  const file = find(TREE, parts);
+  const tree = project(TREE, synced);
+  // A file can vanish under you when a deploy rolls the tree back or forward,
+  // so the breadcrumb follows whatever is actually open, not the last click.
+  const open_ = find(tree, selected.split('/')) ? selected : PROD_SELECTED;
+  const parts = open_.split('/');
+  const file = find(tree, parts);
   const lines = (file?.body ?? '').replace(/\n$/, '').split('\n');
 
   return (
@@ -283,14 +318,14 @@ export function CodeView() {
         aria-label="Project files"
         className="w-[248px] shrink-0 overflow-y-auto border-r border-border-main bg-bg-canvas py-[8px]"
       >
-        {TREE.map((node) => (
+        {tree.map((node) => (
           <Row
             key={node.name}
             node={node}
             path={node.name}
             depth={0}
             open={open}
-            selected={selected}
+            selected={open_}
             onToggle={(path) =>
               setOpen((current) => {
                 const next = new Set(current);
@@ -303,7 +338,7 @@ export function CodeView() {
         ))}
       </nav>
 
-      <div className="flex min-w-px flex-1 flex-col bg-code-canvas">
+      <div className="flex min-w-px flex-1 flex-col bg-bg-canvas">
         <div className="flex h-[40px] shrink-0 items-center gap-[6px] overflow-hidden border-b border-code-line px-[16px]">
           {parts.map((part, index) => (
             <span key={index} className="flex shrink-0 items-center gap-[6px]">

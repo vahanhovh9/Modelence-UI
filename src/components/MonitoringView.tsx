@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Tab } from './Tab';
 import { TableSection } from './ConsoleTable';
+import type { Env } from '../environment';
 
 /*
  * Charts are drawn by hand rather than pulled from a library: every series is a
@@ -282,21 +283,33 @@ function Endpoints() {
 
 /* --------------------------------------------------------------- the page */
 
-export function MonitoringView() {
+/*
+ * Traffic belongs to the environment that served it. Sandbox sees a developer
+ * poking at it; Prod sees the real load — so the two never share a series, and
+ * a deploy does not carry one across.
+ */
+const HEADLINE = {
+  sandbox: { requests: '1.24M', errors: '0.42%', p95: '214 ms', uptime: '99.98%', rpm: '1,842 avg', times: '48 / 214 ms', ok: '99.6% ok', base: 1200 },
+  prod: { requests: '38.6M', errors: '0.08%', p95: '141 ms', uptime: '99.99%', rpm: '26,400 avg', times: '31 / 141 ms', ok: '99.9% ok', base: 26400 },
+};
+
+export function MonitoringView({ env = 'sandbox' }: { env?: Env }) {
   const [range, setRange] = useState<Range>('24h');
+  const copy = HEADLINE[env];
 
   // Reseeded per range, so switching ranges genuinely redraws rather than
   // rescaling the same curve.
   const data = useMemo(() => {
     const n = POINTS[range];
-    const seed = range === '1h' ? 7 : range === '24h' ? 41 : 93;
+    const seed = (range === '1h' ? 7 : range === '24h' ? 41 : 93) + (env === 'prod' ? 500 : 0);
+    const scale = copy.base / 1200;
     return {
-      requests: series(seed, n, 1200, 520),
-      p50: series(seed + 1, n, 48, 22, 1.6),
-      p95: series(seed + 2, n, 190, 90, 1.9),
-      errors: series(seed + 3, 14, 900, 300, 1.4),
+      requests: series(seed, n, copy.base, 520 * scale),
+      p50: series(seed + 1, n, env === 'prod' ? 31 : 48, 16, 1.6),
+      p95: series(seed + 2, n, env === 'prod' ? 128 : 190, 70, 1.9),
+      errors: series(seed + 3, 14, 900 * scale, 300 * scale, 1.4),
     };
-  }, [range]);
+  }, [range, env, copy.base]);
 
   const requestMax = Math.max(...data.requests) * 1.15;
   const latencyMax = Math.max(...data.p95) * 1.2;
@@ -310,7 +323,7 @@ export function MonitoringView() {
         <div className="grid w-full grid-cols-2 gap-[12px] xl:grid-cols-4">
           <StatCard
             label="Requests"
-            value="1.24M"
+            value={copy.requests}
             delta="+8.2%"
             good
             spark={data.requests}
@@ -318,7 +331,7 @@ export function MonitoringView() {
           />
           <StatCard
             label="Error rate"
-            value="0.42%"
+            value={copy.errors}
             delta="+0.11%"
             good={false}
             spark={data.p95}
@@ -326,7 +339,7 @@ export function MonitoringView() {
           />
           <StatCard
             label="p95 latency"
-            value="214 ms"
+            value={copy.p95}
             delta="−18 ms"
             good
             spark={data.p50}
@@ -334,7 +347,7 @@ export function MonitoringView() {
           />
           <StatCard
             label="Uptime"
-            value="99.98%"
+            value={copy.uptime}
             delta="30 days"
             good
             spark={data.requests.map((v) => v * 0.2 + 900)}
@@ -342,7 +355,7 @@ export function MonitoringView() {
           />
         </div>
 
-        <Panel title="Requests per minute" value="1,842 avg">
+        <Panel title="Requests per minute" value={copy.rpm}>
           <div className="w-full">
             <svg
               viewBox={`0 0 ${W} ${H}`}
@@ -378,7 +391,7 @@ export function MonitoringView() {
         <div className="grid w-full grid-cols-1 gap-[12px] lg:grid-cols-2">
           <Panel
             title="Response time"
-            value="48 / 214 ms"
+            value={copy.times}
             legend={
               <div className="flex shrink-0 items-center gap-[10px]">
                 <LegendKey label="p50" tone="bg-accent-green-text" />
@@ -414,7 +427,7 @@ export function MonitoringView() {
 
           <Panel
             title="Status codes"
-            value="99.6% ok"
+            value={copy.ok}
             legend={
               <div className="flex shrink-0 flex-wrap items-center gap-[10px]">
                 {CODES.map((code) => (

@@ -228,6 +228,9 @@ export default function App() {
       active={publishPhase === 'running' || publishPhase === 'action-needed' || settling}
       phase={publishPhase}
       steps={publishSteps}
+      // A finished deploy is what brings Prod's code, files and config up to
+      // Sandbox; it stays synced until the next publish starts.
+      deployed={publishPhase === 'done'}
     />
   ) : target === 'Dashboard' ? (
     // Sandbox's own console, reached from the Dashboard tab.

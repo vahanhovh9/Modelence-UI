@@ -39,6 +39,7 @@ export const assets = {
   upload: '/assets/ds-upload.svg',
   copy: '/assets/ds-copy.svg',
   connect: '/assets/ds-connect.svg',
+  github: '/assets/ds-github.svg',
   history: '/assets/ds-history.svg',
   search: '/assets/ds-search.svg',
   close: '/assets/ds-close.svg',

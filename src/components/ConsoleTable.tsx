@@ -23,8 +23,11 @@ export function TableSection({
         The bar is full-bleed: it carries its own horizontal padding so its rule
         can run the whole width of the pane. A header inset to the content
         column reads as the first row of the table; this reads as chrome.
+        It sticks to the top of the scrolling pane, so the section you are in
+        stays named however far down the table you are — which means it needs a
+        fill of its own, or rows would show through it.
       */}
-      <div className="flex h-[52px] shrink-0 items-center justify-between gap-[12px] border-b border-border-main px-[20px]">
+      <div className="sticky top-0 z-30 flex h-[52px] shrink-0 items-center justify-between gap-[12px] border-b border-border-main bg-bg-container px-[20px]">
         <h2 className="text-h1 text-text-selected">{title}</h2>
         {actions && <div className="flex shrink-0 items-center gap-[8px]">{actions}</div>}
       </div>

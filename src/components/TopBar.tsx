@@ -194,12 +194,20 @@ export function TopBar({
   return (
     <header className={`flex w-full shrink-0 flex-col items-start px-[12px] ${isV2 ? 'py-[12px]' : 'py-[10px]'}`}>
       <div className="flex w-full items-center justify-between px-[3px]">
-        <div className={`flex w-[729px] shrink-0 items-center ${isV2 ? 'gap-[114px]' : 'gap-[129px]'}`}>
+        {/*
+          The 729px is Figma's measure for where the switcher sits; it is a
+          minimum now, so adding a control beside the switcher pushes the row
+          along rather than overflowing the box.
+        */}
+        <div className={`flex min-w-[729px] shrink-0 items-center ${isV2 ? 'gap-[114px]' : 'gap-[129px]'}`}>
           <div className={`flex shrink-0 items-center ${isV2 ? 'gap-[32px]' : 'gap-[22px]'}`}>
             <LogoTile onOpenDashboard={onOpenDashboard} />
             <ProjectSwitcher />
           </div>
-          <Tab options={TARGETS} value={target} onChange={onTargetChange} />
+          <div className="flex shrink-0 items-center gap-[24px]">
+            <Tab options={TARGETS} value={target} onChange={onTargetChange} />
+            <Button icon={<Icon src={assets.github} size={14} />}>Connect GitHub</Button>
+          </div>
         </div>
 
         <div className="flex w-[304px] shrink-0 items-center gap-[12px]">

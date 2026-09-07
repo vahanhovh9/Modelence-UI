@@ -4,6 +4,7 @@ import { HeadCell, IconCta, Scroller, TableHead, TableRow, TableSection } from '
 import { MoreDots } from './Dropdown';
 import { Icon } from './Icon';
 import { StatusBadge } from './StatusBadge';
+import type { Env } from '../environment';
 
 type User = {
   id: string;
@@ -61,6 +62,21 @@ const USERS: User[] = [
     roles: ['Viewer'],
     created: 'Aug 9, 2026',
   },
+];
+
+/*
+ * Accounts are runtime state that each environment owns — Sandbox holds test
+ * logins, Prod holds the people actually using the app. A deploy never copies
+ * one into the other.
+ */
+const PROD_USERS: User[] = [
+  { id: '5b02e7', handle: 'nadia', email: 'nadia@brightfold.co', verified: true, methods: ['Google'], roles: ['Owner'], created: 'Mar 2, 2026' },
+  { id: 'a91c44', handle: 'tomas', email: 'tomas@brightfold.co', verified: true, methods: ['Password'], roles: ['Admin'], created: 'Mar 9, 2026' },
+  { id: '77de10', handle: 'rin.k', email: 'rin@kasugai.jp', verified: true, methods: ['GitHub'], roles: ['Editor'], created: 'Apr 14, 2026' },
+  { id: 'e3f8b6', handle: 'marcus', email: 'marcus@lindqvist.se', verified: true, methods: ['Password', 'Google'], roles: [], created: 'May 21, 2026' },
+  { id: '1c6a29', handle: 'aisha', email: 'aisha@meridianlabs.io', verified: false, methods: ['Password'], roles: [], created: 'Jun 3, 2026' },
+  { id: 'd40b85', handle: 'ollie', email: 'ollie@westhamble.uk', verified: true, methods: ['Google'], roles: ['Viewer'], created: 'Jul 28, 2026' },
+  { id: '9ba712', handle: 'sofia', email: 'sofia@quintadelmar.es', verified: true, methods: ['Password'], roles: [], created: 'Aug 16, 2026' },
 ];
 
 /**
@@ -167,7 +183,9 @@ function SearchControl({
   );
 }
 
-export function UsersView() {
+export function UsersView({ env = 'sandbox' }: { env?: Env }) {
+  // Prod is read-only: search and filter yes, anything that changes it no.
+  const readOnly = env === 'prod';
   const [searching, setSearching] = useState(false);
   const [query, setQuery] = useState('');
   const field = useRef<HTMLDivElement>(null);
@@ -195,10 +213,11 @@ export function UsersView() {
     };
   }, [searching]);
 
+  const people = env === 'prod' ? PROD_USERS : USERS;
   const needle = query.trim().toLowerCase();
   const shown = needle
-    ? USERS.filter((user) => `${user.handle} ${user.email}`.toLowerCase().includes(needle))
-    : USERS;
+    ? people.filter((user) => `${user.handle} ${user.email}`.toLowerCase().includes(needle))
+    : people;
 
   return (
     <TableSection
@@ -216,11 +235,13 @@ export function UsersView() {
             onChange={setQuery}
             boxRef={field}
           />
-          <IconCta
-            icon={<Icon src={assets.dashSettings} size={14} />}
-            label="Auth providers"
-            variant="secondary"
-          />
+          {!readOnly && (
+            <IconCta
+              icon={<Icon src={assets.dashSettings} size={14} />}
+              label="Auth providers"
+              variant="secondary"
+            />
+          )}
         </>
       }
     >
@@ -276,9 +297,13 @@ export function UsersView() {
 
             <span className={`text-body text-text-main ${COLS.created}`}>{user.created}</span>
 
-            <span className="flex size-[24px] shrink-0 items-center justify-center rounded-small text-icon-default transition-colors hover:bg-hover hover:text-icon-selected">
-              <MoreDots />
-            </span>
+            {readOnly ? (
+              <span className="w-[24px] shrink-0" />
+            ) : (
+              <span className="flex size-[24px] shrink-0 items-center justify-center rounded-small text-icon-default transition-colors hover:bg-hover hover:text-icon-selected">
+                <MoreDots />
+              </span>
+            )}
           </TableRow>
         ))}
 
