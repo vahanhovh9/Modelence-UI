@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { INITIAL_TURNS, SCRIPTS, type Step, type Turn } from './script';
+import { INITIAL_TURNS, PROD_SCRIPTS, SCRIPTS, type Step, type Turn } from './script';
 
 const TYPE_INTERVAL_MS = 14;
 const TYPE_CHUNK = 3;
@@ -17,14 +17,19 @@ export function formatDuration(ms: number) {
  * Replays a scripted agent turn: steps appear one at a time, text and tool
  * output type in, and a live timer runs until the turn settles.
  */
-export function useFakeAgent() {
-  const [turns, setTurns] = useState<Turn[]>(INITIAL_TURNS);
+export type AgentApi = ReturnType<typeof useFakeAgent>;
+
+export function useFakeAgent(kind: 'build' | 'prod' = 'build') {
+  const isProd = kind === 'prod';
+  // The Prod agent opens on an empty transcript — it has no build history.
+  const [turns, setTurns] = useState<Turn[]>(isProd ? [] : INITIAL_TURNS);
   const [busy, setBusy] = useState(false);
   const [elapsed, setElapsed] = useState(0);
 
   // Bumped on stop/unmount so an in-flight replay knows to abandon itself.
   const runId = useRef(0);
   const nextId = useRef(INITIAL_TURNS.length + 1);
+  const scripts = isProd ? PROD_SCRIPTS : SCRIPTS;
   const scriptIndex = useRef(0);
 
   useEffect(() => {
@@ -68,7 +73,7 @@ export function useFakeAgent() {
 
       const userId = nextId.current++;
       const agentId = nextId.current++;
-      const script = SCRIPTS[scriptIndex.current % SCRIPTS.length];
+      const script = scripts[scriptIndex.current % scripts.length];
       scriptIndex.current += 1;
 
       setTurns((prev) => [
@@ -128,7 +133,7 @@ export function useFakeAgent() {
       }));
       setBusy(false);
     },
-    [busy, patchAgentTurn]
+    [busy, patchAgentTurn, scripts]
   );
 
   return { turns, busy, elapsed, send, stop };

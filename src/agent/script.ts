@@ -127,3 +127,61 @@ export const SCRIPTS: Step[][] = [
     { kind: 'text', text: 'All green, and the diff is limited to the two files we touched.' },
   ],
 ];
+
+/** The prompt the Deployments page hands the Prod agent. */
+export const PROD_FIX_PROMPT =
+  'Fix the paused Prod deploy: payments.stripeKey and email.smtpUrl are set in Sandbox but missing in Prod. ' +
+  'Add the missing config values and continue the deployment.';
+
+/**
+ * The Prod agent does not write features. Its scripts diagnose and repair the
+ * running environment — config drift, failed deploys, errors — so nothing here
+ * edits application source.
+ */
+export const PROD_SCRIPTS: Step[][] = [
+  [
+    { kind: 'text', text: 'Comparing configuration between Sandbox and Prod.' },
+    {
+      kind: 'tool',
+      tool: 'Bash',
+      label: 'Diff environment configuration',
+      input: 'modelence config diff --from sandbox --to prod',
+      output: 'only in sandbox: payments.stripeKey, email.smtpUrl — 2 keys missing in prod',
+    },
+    { kind: 'text', text: 'Both keys exist in Sandbox. Copying the values across without printing them.' },
+    {
+      kind: 'tool',
+      tool: 'Bash',
+      label: 'Copy config values into Prod',
+      input: 'modelence config copy payments.stripeKey email.smtpUrl --to prod --mask',
+      output: '✓ payments.stripeKey written  ✓ email.smtpUrl written  (values masked in logs)',
+    },
+    {
+      kind: 'tool',
+      tool: 'Bash',
+      label: 'Re-run deploy validation',
+      input: 'modelence deploy validate --env prod',
+      output: '✓ Environment configuration valid — 0 missing keys',
+    },
+    { kind: 'text', text: 'Config is in place and validation passes. Press Confirm & continue to resume the deploy.' },
+  ],
+  [
+    { kind: 'text', text: 'Pulling the last failing request trace from Prod.' },
+    {
+      kind: 'tool',
+      tool: 'Logs',
+      label: 'Errors in the last 15 minutes',
+      input: 'modelence logs --env prod --level error --since 15m',
+      output: '4x ETIMEDOUT upstream=payments.stripe  p95 1840ms  first seen 12m ago',
+    },
+    { kind: 'text', text: 'The payments upstream is timing out, not erroring — the container is healthy.' },
+    {
+      kind: 'tool',
+      tool: 'Bash',
+      label: 'Check container health',
+      input: 'modelence status --env prod',
+      output: 'container healthy  cpu 12%  mem 318/512 MB  restarts 0',
+    },
+    { kind: 'text', text: 'Raising the upstream timeout is the fix here; no application change is needed.' },
+  ],
+];

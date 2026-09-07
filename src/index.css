@@ -2,107 +2,236 @@
 @import 'tailwindcss';
 
 /*
- * Design tokens from Figma: Exploration.
- *   Dark   — Desktop - 4 (node 112:481)
- *   Bright — Desktop - 5 (node 112:591)
+ * Design tokens mirrored from the Figma file's Variables collections
+ * (Exploration — "Sandbox" 883:4354 dark / 883:4497 bright).
  *
- * Tokens are named by ROLE, not by value. A value swap would not work: the same
- * dark colour maps to different bright ones depending on where it is used
- * (black is #ffffff on the composer but #f8f8f8 on the segmented track; grey-600
- * is #ffffff on the rail button but #ededed on the send button).
+ * Two layers, exactly as Figma models them:
+ *   1. Primitives (Greys/*, Purples/*, Greens/*) — one value, no modes. The
+ *      design leans on these where a colour must NOT flip: the send button is
+ *      Greys/600 in both themes, the arrow inside it Greys/0.
+ *   2. Semantic roles (Backgrounds/*, Borders/*, Text/*, Icon*, Buttons/*) —
+ *      these carry Dark and Bright modes and are what :root[data-theme] swaps.
  *
- * Dark is the default; :root[data-theme='bright'] below overrides it.
+ * Figma name                     -> token
+ *   Backgrounds/Main/Bg Canvas   -> --color-bg-canvas
+ *   Backgrounds/Main/Bg Container-> --color-bg-container
+ *   Borders/Border Highlight     -> --color-border-highlight
+ *   Text/Main/Text main          -> --color-text-main
+ *   Buttons/Button main bg       -> --color-button-main-bg
  */
 @theme {
-  /* Surfaces */
-  --color-app: #0e0e0e;
-  --color-panel: #232323;
-  --color-menu: #232323;
-  --color-track: #000000;
-  --color-field: #000000;
-  --color-chip: #292929;
-  --color-control: #363636;
-  --color-control-hover: #484848;
-  --color-pill: #3d3d3d;
-  --color-send: #363636;
-  --color-canvas: #ffffff;
-
-  /* Borders */
-  --color-border: #2f2f2f;
-  --color-border-strong: #484848;
-  --color-border-chip: #484848;
-  --color-canvas-border: #e2e2e2;
-  /* V2 drops the outline on the segmented track and page selector. */
-  --color-track-border: #2f2f2f;
-
-  /* Text */
-  --color-text: #ffffff;
-  --color-text-secondary: #c9c9c9;
-  --color-text-body: #8b8b8b;
-  --color-text-muted: #656565;
-  --color-text-faint: #656565;
-
-  /* Accents */
-  --color-bubble: #373445;
-  --color-bubble-border: #5e5194;
-  --color-bubble-text: #ffffff;
-  --color-publish: #d2b8ff;
-  --color-publish-hover: #e1cfff;
-  --color-publish-text: #000000;
-  --color-publish-border: rgba(255, 255, 255, 0.4);
-  --color-badge-text: #ffffff;
+  /* ---- Primitives: identical in every theme ---- */
+  --color-grey-0: #ffffff;
+  --color-grey-50: #fcfcfc;
+  --color-grey-200: #edeceb;
+  --color-grey-300: #d4d1d1;
+  --color-grey-400: #a1a1a1;
+  --color-grey-500: #6e6e6e;
+  --color-grey-600: #363636;
+  --color-grey-900: #0e0e0e;
+  --color-green-300: #34c759;
+  --color-purple-500: #693ded;
+  --color-purple-800: #373445;
+  /* Not Figma variables, but fixed brand marks in both themes. */
   --color-brand: #570cd9;
-  --color-accent-green: #34c759;
+  --color-claude: #ff7043;
+
+  /* ---- Semantic roles: Dark mode ---- */
+  --color-bg-canvas: #0e0e0e;
+  --color-bg-container: #232323;
+  --color-bg-element-1: #000000;
+  --color-bg-element-2: #000000;
+  --color-bg-selected: #363636;
+  --color-bg-chat: #373445;
+
+  --color-border-main: #2f2f2f;
+  --color-border-highlight: #6e6e6e;
+  --color-border-chat: #693ded;
+
+  --color-text-main: #d4d1d1;
+  --color-text-selected: #ffffff;
+  --color-text-primary: #edeceb;
+
+  --color-icon: #d4d1d1;
+  --color-icon-default: #d4d1d1;
+  --color-icon-selected: #ffffff;
+
+  --color-button-main-bg: #7151f5;
+  --color-button-main-hover: #8468f7;
+  --color-button-secondary-bg: #363636;
+  --color-button-secondary-hover: #444444;
+  --color-button-secondary-text: #edeceb;
+
+  --color-main: #d4d1d1;
+
+  /* Surfaces and text introduced by the Prod frame (732:4128). */
+  --color-bg-primary: #2b2b2b;
+  --color-bg-selected-2: #363636;
+  /*
+   * Backgrounds/Bg Container Secondary. The Prod frame nests these panels on
+   * Bg primary; in dark that reads as black-on-grey, but in bright both
+   * Bg - element 1 and Bg primary are #ffffff, so the nesting needs its own
+   * role to stay visible.
+   */
+  --color-bg-container-secondary: #000000;
+  --color-border-secondary: #363636;
+  --color-text-secondary: #a1a1a1;
+  --color-button-primary-bg: #ffffff;
+  --color-button-primary-text: #000000;
+  --color-text-button: #ffffff;
+
+  /* Accent / status roles. */
+  --color-accent-badge-success: #063d14;
+  --color-accent-bg-success: #34c759;
+  --color-accent-bg-alert: #f8c41a;
+  --color-accent-green-text: #4af075;
+  --color-accent-green-border: #028523;
+  --color-accent-alert-text: #744300;
+  --color-alert-strong: #f8c41a;
+  --color-accent-purple-highlight: #7151f5;
+  --color-accent-success-text: #01280a;
+  --color-danger: #ff6467;
+  --color-danger-hover: #ff8285;
+  --color-green-800: #063d14;
+  /* The build-log terminal keeps its own dark ground in both themes. */
+  --color-terminal: #12141a;
+  --color-terminal-line: #4a5160;
+  --color-terminal-text: #cbd0da;
+  --color-terminal-ok: #00d492;
+  --color-terminal-warn: #ff6467;
+  --color-code-text: #e7000b;
 
   /* Translucent hover wash, inverted per theme. */
   --color-hover: rgba(255, 255, 255, 0.1);
 
+  /* ---- Corner radius variables ---- */
   --radius-small: 6px;
+  --radius-main: 8px;
+  --radius-block: 12px;
 
   /*
-   * The design uses Roobert, which ships as a non-redistributable trial face in
-   * the Figma file. Self-hosted Inter stands in for it — to switch to the real
-   * thing, add its @font-face and put 'Roobert' at the front of this stack.
+   * The design uses Roobert, a non-redistributable trial face in the Figma
+   * file. Self-hosted Inter stands in — add Roobert's @font-face and put it at
+   * the front of this stack to switch.
    */
   --font-sans:
     'Roobert', 'Inter Variable', 'Inter', ui-sans-serif, system-ui, -apple-system,
     'Segoe UI', sans-serif;
 }
 
-/* Unlayered, so it overrides the @theme defaults that Tailwind emits on :root. */
+/* Text styles from the file: H6 and Body. */
+@utility text-h6 {
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1;
+}
+
+@utility text-body {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+@utility text-h1 {
+  font-size: 20px;
+  font-weight: 650;
+  line-height: 24px;
+}
+
+@utility text-h4 {
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1;
+}
+
+@utility text-body-large {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+}
+
+@utility text-large-number {
+  font-size: 26px;
+  font-weight: 650;
+  line-height: 32px;
+}
+
+@utility text-h3 {
+  font-size: 16px;
+  font-weight: 650;
+  line-height: 24px;
+}
+
+@utility text-h5 {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+@utility text-small-title {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+@utility text-xs-title {
+  font-size: 9px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+@utility font-mono-code {
+  font-family: ui-monospace, Menlo, Monaco, 'Cascadia Code', 'Source Code Pro', monospace;
+}
+
+/* ---- Semantic roles: Bright mode ---- */
 :root[data-theme='bright'] {
-  --color-app: #ededed;
-  --color-panel: #f8f8f8;
-  --color-menu: #ffffff;
-  --color-track: #f8f8f8;
-  --color-field: #ffffff;
-  --color-chip: #ffffff;
-  --color-control: #ffffff;
-  --color-control-hover: #e8e8e8;
-  --color-pill: #ffffff;
-  --color-send: #ededed;
+  --color-bg-canvas: #f7f5f5;
+  --color-bg-container: #fcfcfc;
+  --color-bg-element-1: #ffffff;
+  --color-bg-element-2: #e8e8e8;
+  --color-bg-selected: #ffffff;
+  --color-bg-chat: #eeebff;
 
-  --color-border: #e2e2e2;
-  --color-border-strong: #e2e2e2;
-  --color-border-chip: #cecece;
+  --color-border-main: #edeceb;
+  --color-border-highlight: #d4d1d1;
+  --color-border-chat: #d0c7f4;
 
-  --color-text: #000000;
-  --color-text-secondary: #454545;
-  --color-text-body: #676565;
-  --color-text-muted: #7a7a7a;
-  --color-text-faint: #656565;
+  --color-text-main: #5e5e5e;
+  --color-text-selected: #000000;
+  --color-text-primary: #000000;
 
-  --color-bubble: #e5e0fe;
-  --color-bubble-border: #c3b4ff;
-  --color-bubble-text: #000000;
-  --color-publish: #782bff;
-  --color-publish-hover: #8f4dff;
-  --color-publish-text: #ffffff;
-  --color-publish-border: transparent;
-  --color-badge-text: #000000;
+  --color-icon: #232323;
+  --color-icon-default: #5e5e5e;
+  --color-icon-selected: #000000;
+
+  --color-button-main-bg: #693ded;
+  --color-button-main-hover: #7c56f0;
+  --color-button-secondary-bg: #edeceb;
+  --color-button-secondary-hover: #e0dedc;
+  --color-button-secondary-text: #0e0e0e;
+
+  --color-main: #2f2f2f;
+
+  --color-bg-primary: #ffffff;
+  --color-bg-selected-2: #edeceb;
+  --color-bg-container-secondary: #f7f5f5;
+  --color-border-secondary: #f2f0f0;
+  --color-button-primary-bg: #0e0e0e;
+  --color-button-primary-text: #ffffff;
+  --color-text-button: #000000;
+
+  --color-accent-badge-success: #b3ffc6;
+  --color-accent-bg-success: #4af075;
+  --color-accent-bg-alert: #f8d76c;
+  --color-accent-green-text: #028523;
+  --color-accent-green-border: #34c759;
+  --color-accent-purple-highlight: #8f73ff;
+  --color-alert-strong: #744300;
+  --color-danger: #e7000b;
+  --color-danger-hover: #c40009;
 
   --color-hover: rgba(0, 0, 0, 0.06);
-  --color-track-border: #e2e2e2;
 
   color-scheme: light;
 }
@@ -112,79 +241,110 @@
 }
 
 /*
- * Version 2 — Figma "Desktop - 2" (node 98:263). A flat variant: no panel
- * cards, hairline rules instead, a neutral Publish and a grey user bubble.
- * Declared after the bright block, so every token bright touches is restated
- * in the v2+bright pair below rather than left to selector ordering.
+ * Version 2 — Figma "Desktop - 2" (98:263). A flat variant: no panel cards,
+ * hairline rules, a neutral Publish and a grey chat bubble. Expressed against
+ * the same roles so it inherits every component unchanged.
  */
 :root[data-version='v2'] {
-  --color-app: #121212;
-  --color-panel: transparent;
-  --color-track: #000000;
-  --color-track-border: transparent;
-  --color-field: #000000;
-  --color-chip: #292929;
-  --color-control: #363636;
-  --color-send: #363636;
-  --color-pill: #3d3d3d;
-
-  --color-border: #373737;
-  --color-border-strong: #363636;
-  --color-border-chip: #373737;
-
-  --color-text-muted: #7a7a7a;
-
-  --color-bubble: #363636;
-  --color-bubble-border: #484848;
-  --color-bubble-text: #ffffff;
-  --color-publish: #cfcfcf;
-  --color-publish-hover: #dedede;
-  --color-publish-text: #000000;
-  --color-publish-border: #ffffff;
-  --color-accent-green: #24c763;
+  --color-bg-canvas: #121212;
+  --color-bg-container: transparent;
+  --color-border-main: #373737;
+  --color-border-highlight: #363636;
+  --color-bg-chat: #363636;
+  --color-border-chat: #484848;
+  --color-button-main-bg: #cfcfcf;
+  --color-button-main-hover: #dedede;
 }
 
-/*
- * Version 2, bright. Figma has no bright frame for this version, so it is
- * derived: every role keeps the relationship it has in v2 dark (the track sits
- * darker than the page, the chip lighter than the track, Publish stays a
- * neutral high-contrast pill rather than the brand purple).
- */
 :root[data-version='v2'][data-theme='bright'] {
-  --color-app: #f4f4f4;
-  --color-panel: transparent;
-  --color-menu: #ffffff;
-  --color-track: #e4e4e4;
-  --color-track-border: transparent;
-  --color-field: #ffffff;
-  --color-chip: #ffffff;
-  --color-control: #ffffff;
-  --color-control-hover: #e8e8e8;
-  --color-send: #ededed;
-  --color-pill: #ffffff;
+  --color-bg-canvas: #f4f4f4;
+  --color-bg-container: transparent;
+  --color-bg-element-1: #ffffff;
+  --color-bg-element-2: #e4e4e4;
+  --color-bg-selected: #ffffff;
+  --color-bg-chat: #ffffff;
 
-  --color-border: #dcdcdc;
-  --color-border-strong: #dcdcdc;
-  --color-border-chip: #cecece;
+  --color-border-main: #dcdcdc;
+  --color-border-highlight: #cecece;
+  --color-border-chat: #e2e2e2;
 
-  --color-text: #000000;
-  --color-text-secondary: #454545;
-  --color-text-body: #676565;
-  --color-text-muted: #7a7a7a;
-  --color-text-faint: #656565;
+  --color-text-main: #5e5e5e;
+  --color-text-selected: #000000;
+  --color-text-primary: #000000;
+  --color-icon: #232323;
+  --color-icon-default: #5e5e5e;
+  --color-icon-selected: #000000;
 
-  --color-bubble: #ffffff;
-  --color-bubble-border: #e2e2e2;
-  --color-bubble-text: #000000;
-  --color-publish: #1f1f1f;
-  --color-publish-hover: #333333;
-  --color-publish-text: #ffffff;
-  --color-publish-border: transparent;
-  --color-badge-text: #000000;
+  --color-button-main-bg: #1f1f1f;
+  --color-button-main-hover: #333333;
+  --color-button-secondary-bg: #edeceb;
+  --color-button-secondary-hover: #e0dedc;
+  --color-button-secondary-text: #0e0e0e;
+  --color-main: #2f2f2f;
 
   --color-hover: rgba(0, 0, 0, 0.06);
 
   color-scheme: light;
+}
+
+/*
+ * Palette for the publish illustration, derived from theme tokens so the art
+ * re-tints itself per theme instead of carrying its own colours.
+ */
+:root {
+  --art-cloud: color-mix(in srgb, var(--color-accent-purple-highlight) 42%, var(--color-grey-0));
+  --art-cloud-shade: var(--color-accent-purple-highlight);
+  --art-sea: var(--color-button-main-bg);
+  --art-sea-shade: color-mix(in srgb, var(--color-button-main-bg) 68%, black);
+  --art-land: var(--color-accent-bg-success);
+  --art-trail: color-mix(in srgb, var(--color-accent-purple-highlight) 38%, transparent);
+  --art-packet: var(--color-accent-purple-highlight);
+}
+
+/* A packet travelling the length of the trail, cloud to globe. */
+@keyframes packet {
+  from {
+    left: 0;
+    transform: translateX(0);
+  }
+  to {
+    left: 100%;
+    transform: translateX(-100%);
+  }
+}
+
+@utility animate-packet {
+  animation: packet 2.6s linear infinite;
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: scale(0.7);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@utility animate-twinkle {
+  animation: twinkle 2.2s ease-in-out infinite;
+}
+
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@utility animate-bob {
+  animation: bob 3.2s ease-in-out infinite;
 }
 
 /* Indeterminate progress bar for the preview reload. */
@@ -195,6 +355,35 @@
   100% {
     transform: translateX(350%);
   }
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes trailPulse {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  45% {
+    opacity: 1;
+  }
+}
+
+@utility animate-trail {
+  animation: trailPulse 1.4s ease-in-out infinite;
+}
+
+@utility animate-pop-in {
+  animation: popIn 160ms ease-out;
 }
 
 @utility animate-loadbar {
@@ -215,7 +404,7 @@ body,
 
 body {
   margin: 0;
-  background-color: var(--color-app);
+  background-color: var(--color-bg-canvas);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

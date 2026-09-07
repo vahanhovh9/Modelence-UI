@@ -1,18 +1,18 @@
 import { assets } from '../assets';
 import { formatDuration } from '../agent/useFakeAgent';
 import type { Step, Turn } from '../agent/script';
-import { VectorIcon, icons, maskStyle } from './VectorIcon';
+import { Icon, maskStyle } from './Icon';
 
 function Caret() {
   return (
-    <span className="ml-[2px] inline-block h-[11px] w-[6px] translate-y-[1px] animate-pulse bg-text-body align-baseline" />
+    <span className="ml-[2px] inline-block h-[11px] w-[6px] translate-y-[1px] animate-pulse bg-text-main align-baseline" />
   );
 }
 
 function StepView({ step, caret }: { step: Step; caret: boolean }) {
   if (step.kind === 'text') {
     return (
-      <p className="leading-[20px] whitespace-pre-wrap text-text-body">
+      <p className="text-body whitespace-pre-wrap text-text-main">
         {step.text}
         {caret && <Caret />}
       </p>
@@ -21,14 +21,14 @@ function StepView({ step, caret }: { step: Step; caret: boolean }) {
 
   return (
     <div>
-      <p className="leading-[20px]">
-        <span className="font-medium text-text">{step.tool}</span>{' '}
-        <span className="text-text-body">{step.label}</span>
+      <p className="text-body">
+        <span className="font-semibold text-text-selected">{step.tool}</span>{' '}
+        <span className="text-text-main">{step.label}</span>
       </p>
       {step.input && (
         <>
-          <p className="leading-[20px] text-text-muted">IN</p>
-          <p className="leading-[20px] whitespace-pre-wrap text-text-body">
+          <p className="text-body text-grey-400">IN</p>
+          <p className="text-body whitespace-pre-wrap text-text-main">
             {step.input}
             {caret && !step.output && <Caret />}
           </p>
@@ -36,8 +36,8 @@ function StepView({ step, caret }: { step: Step; caret: boolean }) {
       )}
       {step.output && (
         <>
-          <p className="leading-[20px] text-text-muted">OUT</p>
-          <p className="leading-[20px] whitespace-pre-wrap text-text-body">
+          <p className="text-body text-grey-400">OUT</p>
+          <p className="text-body whitespace-pre-wrap text-text-main">
             {step.output}
             {caret && <Caret />}
           </p>
@@ -60,7 +60,7 @@ function Steps({
   bullets?: boolean;
 }) {
   return (
-    <div className={`text-[13px] break-words ${className}`}>
+    <div className={`break-words ${className}`}>
       {steps.map((step, index) => {
         const body = <StepView step={step} caret={working && index === steps.length - 1} />;
         return (
@@ -68,7 +68,7 @@ function Steps({
             key={index}
             className={`${index > 0 ? 'mt-[10px]' : ''} ${bullets ? 'flex gap-[8px]' : ''}`.trim() || undefined}
           >
-            {bullets && <span className="mt-[7px] size-[5px] shrink-0 rounded-full bg-text-muted" />}
+            {bullets && <span className="mt-[7px] size-[5px] shrink-0 rounded-full bg-grey-400" />}
             {bullets ? <div className="min-w-0 flex-1">{body}</div> : body}
           </div>
         );
@@ -79,9 +79,10 @@ function Steps({
 
 export function TurnView({ turn, elapsed, bullets = false }: { turn: Turn; elapsed: number; bullets?: boolean }) {
   if (turn.role === 'user') {
+    // Figma component "Chat Bubble" (528:3146).
     return (
-      <div className="flex w-full shrink-0 items-center justify-center rounded-[8px] border border-bubble-border bg-bubble px-[12px] py-[8px]">
-        <p className="min-w-px flex-1 text-[13px] leading-[20px] break-words text-bubble-text">{turn.text}</p>
+      <div className="flex w-full shrink-0 items-center justify-center rounded-main border border-border-chat bg-bg-chat px-[12px] py-[8px]">
+        <p className="text-body min-w-px flex-1 break-words text-text-primary">{turn.text}</p>
       </div>
     );
   }
@@ -89,37 +90,25 @@ export function TurnView({ turn, elapsed, bullets = false }: { turn: Turn; elaps
   const footer = turn.working ? (
     <div className="flex shrink-0 items-center gap-[4px]">
       <span className="flex size-[16px] items-center justify-center">
-        <span className="size-[6px] animate-pulse rounded-full bg-publish" />
+        <span className="size-[6px] animate-pulse rounded-full bg-button-main-bg" />
       </span>
-      <span className="text-[13px] leading-[20px] whitespace-nowrap text-text-body">
-        working… {formatDuration(elapsed)}
-      </span>
+      <span className="text-body whitespace-nowrap text-text-main">working… {formatDuration(elapsed)}</span>
     </div>
   ) : turn.durationMs !== null ? (
     <div className="flex shrink-0 items-center gap-[4px]">
-      <span className="text-accent-green">
-        <VectorIcon {...icons.check} />
+      <span className="text-green-300">
+        <Icon src={assets.check} />
       </span>
-      <span className="text-[13px] leading-[20px] whitespace-nowrap text-text">
+      <span className="text-body whitespace-nowrap text-text-primary">
         worked for {formatDuration(turn.durationMs)}
       </span>
     </div>
   ) : null;
 
-  if (!turn.rail) {
+  if (bullets || !turn.rail) {
     return (
       <div className="flex w-full shrink-0 flex-col items-start gap-[4px]">
-        <Steps steps={turn.steps} working={turn.working} className="w-full" />
-        {footer}
-      </div>
-    );
-  }
-
-  // V2 renders the same grouped steps with per-step dots, no gutter rail.
-  if (bullets) {
-    return (
-      <div className="flex w-full shrink-0 flex-col items-start gap-[4px]">
-        <Steps steps={turn.steps} working={turn.working} className="w-full" bullets />
+        <Steps steps={turn.steps} working={turn.working} className="w-full" bullets={bullets} />
         {footer}
       </div>
     );
@@ -128,8 +117,8 @@ export function TurnView({ turn, elapsed, bullets = false }: { turn: Turn; elaps
   return (
     <div className="flex w-full shrink-0 flex-col items-start gap-[4px]">
       <div className="flex w-full items-stretch gap-[8px]">
-        {/* The exported rail is a fixed 5×105 tile, repeated so it spans any number of steps. */}
-        <div className="flex shrink-0 py-[7px] text-text-muted">
+        {/* The exported rail is a fixed 5x105 tile, repeated so it spans any number of steps. */}
+        <div className="flex shrink-0 py-[7px] text-grey-400">
           <div
             aria-hidden
             className="w-[5px] shrink-0 bg-current"
