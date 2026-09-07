@@ -11,12 +11,15 @@ export function ResizeHandle({
   max,
   defaultWidth,
   onChange,
+  onResizingChange,
 }: {
   width: number;
   min: number;
   max: number;
   defaultWidth: number;
   onChange: (width: number) => void;
+  /** Lets the layout drop its width transition for the duration of a drag. */
+  onResizingChange?: (resizing: boolean) => void;
 }) {
   const [dragging, setDragging] = useState(false);
 
@@ -27,10 +30,12 @@ export function ResizeHandle({
     const startX = event.clientX;
     const startWidth = width;
     setDragging(true);
+    onResizingChange?.(true);
 
     const move = (moveEvent: PointerEvent) => onChange(clamp(startWidth + moveEvent.clientX - startX));
     const up = () => {
       setDragging(false);
+      onResizingChange?.(false);
       window.removeEventListener('pointermove', move);
       window.removeEventListener('pointerup', up);
       document.body.style.removeProperty('cursor');
@@ -64,7 +69,7 @@ export function ResizeHandle({
       >
         <div
           className={`absolute inset-y-[14px] left-[3px] w-[2px] rounded-full transition-colors ${
-            dragging ? 'bg-publish' : 'bg-transparent group-hover:bg-border-strong group-focus:bg-border-strong'
+            dragging ? 'bg-button-main-bg' : 'bg-transparent group-hover:bg-border-highlight group-focus:bg-border-highlight'
           }`}
         />
       </div>
