@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { DashboardHome } from './DashboardHome';
 import { DashboardSidebar, type DashSection } from './DashboardSidebar';
+import type { Theme } from '../ThemeSwitcher';
 import { UsageAndPlan } from './UsageAndPlan';
 
 /**
@@ -8,12 +9,20 @@ import { UsageAndPlan } from './UsageAndPlan';
  * Reached from the Modelence logo. Opening an application from the Dashboard
  * section is what returns you to the app builder, in the chosen environment.
  */
-export function Dashboard({ onOpenApp }: { onOpenApp: (environment: string) => void }) {
+export function Dashboard({
+  onOpenApp,
+  theme,
+  onThemeChange,
+}: {
+  onOpenApp: (environment: string) => void;
+  theme: Theme;
+  onThemeChange: (theme: Theme) => void;
+}) {
   const [section, setSection] = useState<DashSection>('Dashboard');
 
   return (
     <div className="flex h-full w-full items-stretch bg-bg-canvas">
-      <DashboardSidebar section={section} onSelect={setSection} />
+      <DashboardSidebar section={section} onSelect={setSection} theme={theme} onThemeChange={onThemeChange} />
       <div className="flex min-w-px flex-1 items-stretch py-[8px] pr-[8px]">
         {section === 'Dashboard' ? (
           <DashboardHome onOpenApp={onOpenApp} />

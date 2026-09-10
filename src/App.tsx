@@ -3,6 +3,7 @@ import { AgentTab } from './components/AgentTab';
 import { BuilderPreview } from './components/BuilderPreview';
 import { ChatPanel } from './components/ChatPanel';
 import { Dashboard } from './components/dashboard/Dashboard';
+import { DesignSystem } from './components/design/DesignSystem';
 import { EnvironmentRail } from './components/EnvironmentRail';
 import { MobilePreview } from './components/MobilePreview';
 import { ProdPanel } from './components/ProdPanel';
@@ -68,7 +69,7 @@ export default function App() {
   const [version, setVersion] = useState<Version>('v1');
   const [environment, setEnvironment] = useState('Sandbox');
   const [target, setTarget] = useState<'Web' | 'Mobile app' | 'Dashboard'>('Web');
-  const [view, setView] = useState<'builder' | 'dashboard'>('builder');
+  const [view, setView] = useState<'builder' | 'dashboard' | 'design'>('builder');
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
@@ -137,6 +138,7 @@ export default function App() {
       active={environment}
       onActiveChange={setEnvironment}
       onToggleVersion={toggleVersion}
+      onOpenDesignSystem={() => setView('design')}
     />
   );
 
@@ -244,6 +246,10 @@ export default function App() {
 
   // The account dashboard replaces the whole shell; the sidebar's "Dashboard"
   // item is the way back.
+  if (view === 'design') {
+    return <DesignSystem theme={theme} onThemeChange={setTheme} onBack={() => setView('builder')} />;
+  }
+
   if (view === 'dashboard') {
     return (
       <Dashboard
@@ -251,6 +257,8 @@ export default function App() {
           setEnvironment(target);
           setView('builder');
         }}
+        theme={theme}
+        onThemeChange={setTheme}
       />
     );
   }

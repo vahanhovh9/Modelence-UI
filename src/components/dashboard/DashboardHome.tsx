@@ -7,6 +7,7 @@ import { AgentMark } from '../AgentHeader';
 import { AGENTS } from '../../agent/models';
 import { Modal } from '../Modal';
 import { AppThumbnail, type ThumbKind } from './AppThumbnail';
+import { PromptGlow } from './PromptGlow';
 
 type EnvStatus = 'Running' | 'Paused';
 type AppEnv = { name: 'Sandbox' | 'Prod'; status: EnvStatus };
@@ -464,10 +465,14 @@ export function DashboardHome({ onOpenApp }: { onOpenApp: (env: AppEnv['name']) 
 
         <h1 className="text-[32px] leading-[40px] font-semibold text-text-selected">What are we building today?</h1>
 
-        <Composer />
+        {/* The glow is anchored to the composer and masked away at its top edge. */}
+        <div className="relative isolate w-full">
+          <PromptGlow />
+          <Composer />
+        </div>
 
         <div className="flex w-full shrink-0 flex-col items-center gap-[12px]">
-          <p className="text-body text-text-secondary">Already have an app somewhere else?</p>
+          <p className="text-body text-text-main">Already have an app somewhere else?</p>
           <div className="flex flex-wrap items-center justify-center gap-[10px]">
             <Button>Import from Lovable</Button>
             <Button icon={<Icon src={assets.zap} />}>Import from Bolt</Button>

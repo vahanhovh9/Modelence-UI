@@ -1,6 +1,8 @@
 import { assets } from '../../assets';
 import { Button } from '../Button';
 import { BrandIcon, Icon } from '../Icon';
+import { Dropdown } from '../Dropdown';
+import { ThemeSwitcher, type Theme } from '../ThemeSwitcher';
 
 export const DASH_SECTIONS = [
   { name: 'Dashboard', icon: assets.dashDashboard },
@@ -45,13 +47,17 @@ function NavItem({
 export function DashboardSidebar({
   section,
   onSelect,
+  theme,
+  onThemeChange,
 }: {
   section: DashSection;
   onSelect: (section: DashSection) => void;
+  theme: Theme;
+  onThemeChange: (theme: Theme) => void;
 }) {
   return (
-    <div className="flex h-full w-[201px] shrink-0 items-center px-[16px] pt-[8px]">
-      <div className="flex h-full w-[169px] shrink-0 flex-col items-start justify-between pb-[8px]">
+    <div className="flex h-full w-[201px] shrink-0 items-center px-[16px] pt-[12px] pb-[16px]">
+      <div className="flex h-full w-[169px] shrink-0 flex-col items-start justify-between">
         <div className="flex shrink-0 flex-col items-start gap-[20px]">
           <div className="relative size-[28px] shrink-0 overflow-clip rounded-small bg-brand">
             <BrandIcon
@@ -63,18 +69,39 @@ export function DashboardSidebar({
           </div>
 
           <div className="flex shrink-0 flex-col items-start gap-[24px]">
-            <button
-              type="button"
-              className="flex h-[32px] w-[164px] shrink-0 items-center justify-between rounded-main pr-[12px] pl-[4px] transition-colors hover:bg-hover"
+            <Dropdown
+              panelWidth="w-[196px]"
+              trigger={({ open, toggle }) => (
+                <button
+                  type="button"
+                  aria-expanded={open}
+                  onClick={toggle}
+                  className={`flex h-[32px] w-[164px] shrink-0 items-center justify-between rounded-main pr-[12px] pl-[4px] transition-colors ${
+                    open ? 'bg-hover' : 'hover:bg-hover'
+                  }`}
+                >
+                  <span className="flex shrink-0 items-center gap-[8px]">
+                    <span className="flex size-[24.5px] shrink-0 items-center justify-center rounded-[7px] border border-[#a3dbaf] bg-[#ccffd7] text-[10.5px] leading-[14px] font-semibold text-[#20562c]">
+                      VC
+                    </span>
+                    <span className="text-small-title whitespace-nowrap text-text-main">Vahan Co</span>
+                  </span>
+                  <Icon
+                    src={assets.chevron16}
+                    className={`text-icon transition-transform ${open ? 'rotate-180' : ''}`}
+                  />
+                </button>
+              )}
             >
-              <span className="flex shrink-0 items-center gap-[8px]">
-                <span className="flex size-[24.5px] shrink-0 items-center justify-center rounded-[7px] border border-[#a3dbaf] bg-[#ccffd7] text-[10.5px] leading-[14px] font-semibold text-[#20562c]">
-                  VC
+              {() => (
+                // The switcher itself, not a pair of menu items — it is the same
+                // control the builder rail carries, laid out for a menu row.
+                <span className="flex items-center justify-between gap-[12px] px-[8px] py-[4px]">
+                  <span className="text-h6 whitespace-nowrap text-text-main">Appearance</span>
+                  <ThemeSwitcher theme={theme} onChange={onThemeChange} orientation="horizontal" />
                 </span>
-                <span className="text-small-title whitespace-nowrap text-text-main">Vahan Co</span>
-              </span>
-              <Icon src={assets.chevron16} className="text-icon" />
-            </button>
+              )}
+            </Dropdown>
 
             <div className="flex w-full shrink-0 flex-col items-start gap-[8px]">
               {DASH_SECTIONS.map((item) => (
@@ -106,11 +133,11 @@ export function DashboardSidebar({
                     ›
                   </span>
                 </div>
-                <div className="flex w-full flex-col items-start">
+                <div className="flex w-full flex-col items-start gap-[4px]">
                   <span className="text-xs-title text-text-secondary">App builder</span>
                   <span className="text-h6 text-text-main">$0.00 / $200.00</span>
                 </div>
-                <Button className="w-full" icon={<Icon src={assets.zap} />}>
+                <Button variant="main" className="mt-[7px] w-full" icon={<Icon src={assets.zap} />}>
                   Upgrade
                 </Button>
               </div>
@@ -118,7 +145,7 @@ export function DashboardSidebar({
           </div>
 
           {/* Figma "Frame 79" (1115:12904) — the signed-in user row. */}
-          <div className="flex h-[24px] w-full shrink-0 items-center justify-between rounded-main bg-bg-container px-[4px]">
+          <div className="flex h-[24px] w-full shrink-0 items-center justify-between rounded-main px-[4px]">
             <span className="flex shrink-0 items-center gap-[8px]">
               <span className="relative shrink-0">
                 <img

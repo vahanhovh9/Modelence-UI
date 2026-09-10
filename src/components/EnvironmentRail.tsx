@@ -70,6 +70,7 @@ export function EnvironmentRail({
   active,
   onActiveChange,
   onToggleVersion,
+  onOpenDesignSystem,
 }: {
   theme: Theme;
   onThemeChange: (theme: Theme) => void;
@@ -77,6 +78,7 @@ export function EnvironmentRail({
   active: string;
   onActiveChange: (name: string) => void;
   onToggleVersion: () => void;
+  onOpenDesignSystem: () => void;
 }) {
   const isV2 = version === 'v2';
   const [installed, setInstalled] = useState<string[]>(DEFAULT_ENVIRONMENTS);
@@ -148,6 +150,18 @@ export function EnvironmentRail({
                     }
                     onClick={() => {
                       onToggleVersion();
+                      close();
+                    }}
+                  />
+                  <MenuItem
+                    label="Design system"
+                    icon={
+                      <span className="flex size-[16px] shrink-0 items-center justify-center text-icon-default">
+                        <Icon src={assets.sparkle} size={14} />
+                      </span>
+                    }
+                    onClick={() => {
+                      onOpenDesignSystem();
                       close();
                     }}
                   />
