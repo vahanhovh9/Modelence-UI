@@ -3,7 +3,7 @@ import { assets } from '../assets';
 import { HeadCell, IconCta, Scroller, TableHead, TableRow, TableSection } from './ConsoleTable';
 import { MoreDots } from './Dropdown';
 import { Icon } from './Icon';
-import { StatusBadge } from './StatusBadge';
+import { StatusDot } from './StatusBadge';
 import type { Env } from '../environment';
 
 type User = {
@@ -79,22 +79,9 @@ const PROD_USERS: User[] = [
   { id: '9ba712', handle: 'sofia', email: 'sofia@quintadelmar.es', verified: true, methods: ['Password'], roles: [], created: 'Aug 16, 2026' },
 ];
 
-/**
- * An auth method, stripped to a dot and its name. A method is a fact about the
- * account rather than a status, so it does not need a chip around it — the dot
- * is enough to separate two of them.
- */
-function Method({ name }: { name: string }) {
-  return (
-    <span className="flex shrink-0 items-center gap-[5px]">
-      <span aria-hidden className="size-[6px] shrink-0 rounded-full bg-button-main-bg" />
-      <span className="text-body whitespace-nowrap text-text-main">{name}</span>
-    </span>
-  );
-}
-
 const COLS = {
   id: 'w-[128px] shrink-0',
+  status: 'flex w-[124px] shrink-0 items-center',
   methods: 'w-[168px] shrink-0',
   roles: 'w-[104px] shrink-0',
   created: 'w-[112px] shrink-0',
@@ -245,11 +232,12 @@ export function UsersView({ env = 'sandbox' }: { env?: Env }) {
         </>
       }
     >
-      <Scroller min="min-w-[880px]">
+      <Scroller min="min-w-[1040px]">
         <TableHead>
           <HeadCell className={COLS.id}>ID</HeadCell>
           <HeadCell className="min-w-px flex-1">Handle</HeadCell>
           <HeadCell className="min-w-px flex-1">Email</HeadCell>
+          <HeadCell className={COLS.status}>Email status</HeadCell>
           <HeadCell className={COLS.methods}>Auth Methods</HeadCell>
           <HeadCell className={COLS.roles}>Roles</HeadCell>
           <HeadCell className={COLS.created}>Created</HeadCell>
@@ -272,18 +260,20 @@ export function UsersView({ env = 'sandbox' }: { env?: Env }) {
 
             <span className="text-body min-w-px flex-1 truncate font-semibold text-text-primary">{user.handle}</span>
 
-            <span className="flex min-w-px flex-1 items-center gap-[8px]">
-              <span className="text-body min-w-px truncate text-text-main">{user.email}</span>
-              {user.verified ? (
-                <StatusBadge label="Verified" />
-              ) : (
-                <StatusBadge label="Unverified" tone="neutral" />
-              )}
+            <span className="text-body min-w-px flex-1 truncate text-text-main" title={user.email}>
+              {user.email}
+            </span>
+
+            <span className={COLS.status}>
+              <StatusDot
+                label={user.verified ? 'Verified' : 'Unverified'}
+                tone={user.verified ? 'success' : 'pending'}
+              />
             </span>
 
             <span className={`flex flex-wrap items-center gap-[12px] ${COLS.methods}`}>
               {user.methods.map((method) => (
-                <Method key={method} name={method} />
+                <StatusDot key={method} label={method} tone="neutral" />
               ))}
             </span>
 

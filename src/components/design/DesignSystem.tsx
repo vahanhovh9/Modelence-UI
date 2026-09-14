@@ -3,7 +3,7 @@ import { assets } from '../../assets';
 import { Button } from '../Button';
 import { Dropdown, MenuItem, MoreDots } from '../Dropdown';
 import { BrandIcon, Icon } from '../Icon';
-import { StatusBadge } from '../StatusBadge';
+import { StatusBadge, StatusDot } from '../StatusBadge';
 import { Tab } from '../Tab';
 import { ThemeSwitcher, type Theme } from '../ThemeSwitcher';
 import { HeadCell, IconCta, Scroller, TableHead, TableRow } from '../ConsoleTable';
@@ -207,21 +207,31 @@ function Atoms() {
         </Grid>
       </Block>
 
-      <Block title="Badge" note="Never fully round — that shape belongs to buttons. The dot can give way to a glyph.">
-        <Frame label="StatusBadge">
-          <StatusBadge label="Ready" />
-          <StatusBadge label="Paused" tone="neutral" />
-          <StatusBadge label="Current" shape="pill" />
-          <StatusBadge
-            label="Private"
-            tone="neutral"
-            icon={
-              <span className="shrink-0 text-text-secondary">
-                <Icon src={assets.lock} size={11} />
-              </span>
-            }
-          />
-        </Frame>
+      <Block
+        title="Status"
+        note="A status is a dot and a label on Text main. The chip is reserved for the Prod header, where it has to hold its own against the top bar — everywhere else the fill only adds weight."
+      >
+        <Grid>
+          <Frame label="StatusDot — everywhere">
+            <StatusDot label="Ready" />
+            <StatusDot label="Verified" />
+            <StatusDot label="Paused" tone="neutral" />
+            <StatusDot label="Unverified" tone="pending" />
+            <StatusDot label="Current" tone="accent" />
+            <StatusDot
+              label="Private"
+              icon={
+                <span className="shrink-0 text-text-secondary">
+                  <Icon src={assets.lock} size={11} />
+                </span>
+              }
+            />
+          </Frame>
+          <Frame label="StatusBadge — Prod header only">
+            <StatusBadge />
+            <span className="text-body text-text-secondary">never fully round; that shape is a button's</span>
+          </Frame>
+        </Grid>
       </Block>
 
       <Block title="Switcher" note="The selected element is the full height of the track and covers its border, so it stands on the switcher rather than sitting inside it.">
@@ -290,7 +300,7 @@ function Molecules() {
                 <span className="font-mono-code min-w-px flex-1 truncate text-[12px] text-text-primary">{file}</span>
                 <span className="text-body w-[88px] shrink-0 text-text-main">4 KB</span>
                 <span className="flex w-[104px] shrink-0 items-center">
-                  <StatusBadge label="Private" tone="neutral" />
+                  <StatusDot label="Private" tone="neutral" />
                 </span>
                 <span className="flex size-[24px] shrink-0 items-center justify-center rounded-small text-icon-default">
                   <MoreDots />

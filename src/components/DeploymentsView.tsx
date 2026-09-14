@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { assets } from '../assets';
 import { Button } from './Button';
 import { Icon } from './Icon';
-import { StatusBadge } from './StatusBadge';
+import { StatusDot } from './StatusBadge';
 import { PUBLISH_STEPS, type PublishPhase, type StepId, type StepState } from '../publish';
 
 const META = [
@@ -394,11 +394,9 @@ function SettledDeployment() {
     <div className="flex w-full shrink-0 flex-col items-start rounded-main border border-border-main bg-bg-primary p-[24px]">
       <div className="flex w-full items-center gap-[10px]">
         <h3 className="text-h1 text-text-selected">#183</h3>
-        <span className="text-small-title flex h-[22px] shrink-0 items-center rounded-small border border-border-chat bg-bg-chat px-[8px] text-text-selected">
-          Current
-        </span>
+        <StatusDot label="Current" tone="accent" />
         <span className="min-w-px flex-1" />
-        <StatusBadge label="Ready" shape="pill" />
+        <StatusDot label="Ready" />
       </div>
 
       <p className="text-body mt-[8px] w-full text-text-primary">Improve onboarding empty states</p>

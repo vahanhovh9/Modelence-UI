@@ -1,7 +1,7 @@
 import { Button } from './Button';
 import { TableSection } from './ConsoleTable';
 import { MoreDots } from './Dropdown';
-import { StatusBadge } from './StatusBadge';
+import { StatusDot } from './StatusBadge';
 
 const FACTS: [string, string][] = [
   ['Application', 'product-design-diary'],
@@ -135,7 +135,7 @@ function CloudContainers() {
                 {container.id.slice(0, 16)}…
               </span>
               <span className={COLS.status}>
-                <StatusBadge label={container.status} />
+                <StatusDot label={container.status} />
               </span>
               <span className={`text-body text-text-main ${COLS.started}`}>{container.started}</span>
               <span className={`-ml-[4px] ${COLS.logs}`}>

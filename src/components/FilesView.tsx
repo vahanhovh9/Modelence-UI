@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { assets } from '../assets';
 import { MoreDots } from './Dropdown';
 import { Icon } from './Icon';
-import { StatusBadge } from './StatusBadge';
+import { StatusDot } from './StatusBadge';
 import { HeadCell, IconCta, Scroller, TableHead, TableRow, TableSection } from './ConsoleTable';
 import { inSync, type Env } from '../environment';
 
@@ -73,9 +73,8 @@ function FileName({ path, variant = 'row' }: { path: string; variant?: keyof typ
 
 function Private() {
   return (
-    <StatusBadge
+    <StatusDot
       label="Private"
-      tone="neutral"
       icon={
         <span className="shrink-0 text-text-secondary">
           <Icon src={assets.lock} size={11} />

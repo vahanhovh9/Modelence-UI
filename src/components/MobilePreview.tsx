@@ -1,7 +1,7 @@
 import { assets } from '../assets';
 import { Button } from './Button';
 import { Icon } from './Icon';
-import { StatusBadge } from './StatusBadge';
+import { StatusDot } from './StatusBadge';
 import type { Version } from '../version';
 
 const URL = 'https://mobile-tenant-sandbox-vzbms.sandbox.modelence.app';
@@ -202,7 +202,7 @@ function PreviewCard() {
     <div className="flex w-[320px] shrink-0 flex-col gap-[14px] self-start rounded-main border border-border-main bg-bg-primary p-[20px]">
       <div className="flex items-center justify-between gap-[12px]">
         <h3 className="text-h3 text-text-selected">Preview on your phone</h3>
-        <StatusBadge label="Running" />
+        <StatusDot label="Running" />
       </div>
 
       <p className="text-body text-text-main">

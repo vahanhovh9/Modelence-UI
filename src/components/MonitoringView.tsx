@@ -194,11 +194,16 @@ function StatCard({
 
 /* ------------------------------------------------------------ status codes */
 
+/*
+ * A grey ramp rather than a traffic-light one. Colour in a chart should mean
+ * something, and here only one band does: 5xx takes the purple so the eye lands
+ * on it, and the rest separate by value alone.
+ */
 const CODES = [
-  { label: '2xx', tone: 'text-accent-green-text', dot: 'bg-accent-green-text', share: 0.86 },
-  { label: '3xx', tone: 'text-text-secondary', dot: 'bg-text-secondary', share: 0.07 },
-  { label: '4xx', tone: 'text-alert-strong', dot: 'bg-alert-strong', share: 0.05 },
-  { label: '5xx', tone: 'text-danger', dot: 'bg-danger', share: 0.02 },
+  { label: '2xx', tone: 'text-text-secondary', dot: 'bg-text-secondary', share: 0.86 },
+  { label: '3xx', tone: 'text-border-highlight', dot: 'bg-border-highlight', share: 0.07 },
+  { label: '4xx', tone: 'text-text-main', dot: 'bg-text-main', share: 0.05 },
+  { label: '5xx', tone: 'text-button-main-bg', dot: 'bg-button-main-bg', share: 0.02 },
 ];
 
 /** Stacked bars: one column per bucket, split by status class. */
@@ -249,8 +254,8 @@ const ENDPOINTS = [
 ];
 
 const METHOD_TONE: Record<string, string> = {
-  GET: 'text-accent-green-text',
-  POST: 'text-text-selected',
+  GET: 'text-text-secondary',
+  POST: 'text-text-main',
 };
 
 function Endpoints() {
@@ -270,7 +275,7 @@ function Endpoints() {
           </span>
           <span className="hidden h-[6px] w-[120px] shrink-0 overflow-clip rounded-full bg-bg-element-2 sm:block">
             <span
-              className="block h-full rounded-full bg-button-main-bg"
+              className="block h-full rounded-full bg-text-main"
               style={{ width: `${(endpoint.ms / slowest) * 100}%` }}
             />
           </span>
@@ -335,7 +340,7 @@ export function MonitoringView({ env = 'sandbox' }: { env?: Env }) {
             delta="+0.11%"
             good={false}
             spark={data.p95}
-            tone="text-danger"
+            tone="text-text-secondary"
           />
           <StatCard
             label="p95 latency"
@@ -343,7 +348,7 @@ export function MonitoringView({ env = 'sandbox' }: { env?: Env }) {
             delta="−18 ms"
             good
             spark={data.p50}
-            tone="text-accent-green-text"
+            tone="text-text-secondary"
           />
           <StatCard
             label="Uptime"
@@ -351,7 +356,7 @@ export function MonitoringView({ env = 'sandbox' }: { env?: Env }) {
             delta="30 days"
             good
             spark={data.requests.map((v) => v * 0.2 + 900)}
-            tone="text-accent-green-text"
+            tone="text-text-secondary"
           />
         </div>
 
@@ -394,7 +399,7 @@ export function MonitoringView({ env = 'sandbox' }: { env?: Env }) {
             value={copy.times}
             legend={
               <div className="flex shrink-0 items-center gap-[10px]">
-                <LegendKey label="p50" tone="bg-accent-green-text" />
+                <LegendKey label="p50" tone="bg-text-secondary" />
                 <LegendKey label="p95" tone="bg-button-main-bg" />
               </div>
             }
@@ -414,7 +419,7 @@ export function MonitoringView({ env = 'sandbox' }: { env?: Env }) {
                 <path
                   d={smooth(data.p50, latencyMax)}
                   fill="none"
-                  className="text-accent-green-text"
+                  className="text-text-secondary"
                   stroke="currentColor"
                   strokeWidth={1.6}
                   strokeLinecap="round"

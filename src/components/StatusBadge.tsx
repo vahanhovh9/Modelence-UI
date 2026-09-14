@@ -1,6 +1,12 @@
 import type { ReactNode } from 'react';
 
-/** Figma component 1007:5906 — a status pill. */
+/**
+ * Figma component 1007:5906 — a status pill.
+ *
+ * The chip is reserved for the Prod header, where it has to hold its own
+ * against the top bar's chrome. Everywhere else a status is a dot and a label
+ * on Text main — see StatusDot below.
+ */
 export function StatusBadge({
   label = 'Active',
   tone = 'success',
@@ -27,6 +33,44 @@ export function StatusBadge({
     >
       {icon ?? <span aria-hidden className={`size-[6px] shrink-0 rounded-full ${dot}`} />}
       <span className={`text-small-title whitespace-nowrap ${label_}`}>{label}</span>
+    </span>
+  );
+}
+
+type Tone = 'success' | 'neutral' | 'accent' | 'pending';
+
+/*
+ * Pending is the one that is drawn rather than filled: a ring reads as
+ * something not yet done, where a solid dot reads as a state it has reached.
+ */
+const DOT: Record<Tone, string> = {
+  success: 'bg-accent-green-text',
+  neutral: 'bg-text-secondary',
+  accent: 'bg-button-main-bg',
+  pending: 'border border-text-secondary',
+};
+
+/**
+ * A status as a dot and a label, with no chip around it.
+ *
+ * This is the default: inside a table or a card a status is a fact about the
+ * row, and a fill around it only adds weight. The dot carries the meaning and
+ * the label stays on Text main like the rest of the row.
+ */
+export function StatusDot({
+  label,
+  tone = 'success',
+  icon,
+}: {
+  label: string;
+  tone?: Tone;
+  /** Replaces the dot where a glyph says more — a lock, say. */
+  icon?: ReactNode;
+}) {
+  return (
+    <span className="flex shrink-0 items-center gap-[6px]">
+      {icon ?? <span aria-hidden className={`size-[6px] shrink-0 rounded-full ${DOT[tone]}`} />}
+      <span className="text-body whitespace-nowrap text-text-main">{label}</span>
     </span>
   );
 }
