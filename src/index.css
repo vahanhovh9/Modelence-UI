@@ -30,6 +30,7 @@
   --color-grey-600: #363636;
   --color-grey-900: #0e0e0e;
   --color-green-300: #34c759;
+  --color-purple-300: #967dff;
   --color-purple-500: #693ded;
   --color-purple-800: #373445;
   /* Not Figma variables, but fixed brand marks in both themes. */
@@ -46,7 +47,7 @@
 
   --color-border-main: #2f2f2f;
   --color-border-highlight: #6e6e6e;
-  --color-border-chat: #693ded;
+  --color-border-chat: var(--color-purple-300);
 
   --color-text-main: #d4d1d1;
   --color-text-selected: #ffffff;

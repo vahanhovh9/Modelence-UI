@@ -79,6 +79,17 @@ const PROD_USERS: User[] = [
   { id: '9ba712', handle: 'sofia', email: 'sofia@quintadelmar.es', verified: true, methods: ['Password'], roles: [], created: 'Aug 16, 2026' },
 ];
 
+/*
+ * Each method gets its own glyph instead of a dot — a key for a password, the
+ * provider's mark for the rest. They go through the icon mask like every other
+ * glyph, so the brands stay monochrome and follow the row's text colour.
+ */
+const METHOD_ICON: Record<string, string> = {
+  Password: assets.key,
+  Google: assets.google,
+  GitHub: assets.github,
+};
+
 const COLS = {
   id: 'w-[128px] shrink-0',
   status: 'flex w-[124px] shrink-0 items-center',
@@ -120,8 +131,8 @@ function SearchControl({
   return (
     <div
       ref={boxRef}
-      className={`group/search relative flex h-[26px] shrink-0 items-center overflow-hidden bg-button-secondary-bg transition-all duration-300 ease-out motion-reduce:transition-none ${
-        open ? 'w-[280px] gap-[6px] rounded-main pr-[4px] pl-[6px]' : 'w-[26px] rounded-full'
+      className={`group/search relative flex h-[28px] shrink-0 items-center overflow-hidden bg-button-secondary-bg transition-all duration-300 ease-out motion-reduce:transition-none ${
+        open ? 'w-[280px] gap-[6px] rounded-main pr-[4px] pl-[6px]' : 'w-[28px] rounded-full'
       }`}
     >
       <button
@@ -129,7 +140,7 @@ function SearchControl({
         aria-label="Search users"
         aria-expanded={open}
         onClick={onToggle}
-        className="flex size-[24px] shrink-0 items-center justify-center rounded-full text-button-secondary-text transition-colors hover:text-text-selected"
+        className="flex size-[26px] shrink-0 items-center justify-center rounded-full text-button-secondary-text transition-colors hover:text-text-selected"
       >
         <Icon src={assets.search} size={14} />
       </button>
@@ -273,7 +284,18 @@ export function UsersView({ env = 'sandbox' }: { env?: Env }) {
 
             <span className={`flex flex-wrap items-center gap-[12px] ${COLS.methods}`}>
               {user.methods.map((method) => (
-                <StatusDot key={method} label={method} tone="neutral" />
+                <StatusDot
+                  key={method}
+                  label={method}
+                  tone="neutral"
+                  icon={
+                    METHOD_ICON[method] ? (
+                      <span className="shrink-0 text-text-secondary">
+                        <Icon src={METHOD_ICON[method]} size={13} />
+                      </span>
+                    ) : undefined
+                  }
+                />
               ))}
             </span>
 

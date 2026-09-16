@@ -29,6 +29,22 @@ const LOG_LINES: LogLine[] = [
   { text: '⚠ Deploy paused — waiting for confirmation', tone: 'warn' },
 ];
 
+/** The tail a deployment that actually landed leaves behind. */
+const DONE_LINES: LogLine[] = [
+  { text: '$ modelence deploy --env prod', tone: 'command' },
+  { text: 'Resolving 214 modules…' },
+  { text: 'Compiling client bundle (vite build)…' },
+  { text: '✓ Client build completed in 5.9s (1.2 MB gzipped)', tone: 'ok' },
+  { text: 'Compiling server bundle (esbuild)…' },
+  { text: '✓ Server build completed in 2.8s', tone: 'ok' },
+  { text: 'Uploading artifact (18.1 MB) to registry…' },
+  { text: '✓ Artifact uploaded', tone: 'ok' },
+  { text: 'Provisioning container (us-west-2, 512 MB)…' },
+  { text: '✓ Environment configuration valid — 0 missing keys', tone: 'ok' },
+  { text: '✓ Container healthy — app started in 4.2s', tone: 'ok' },
+  { text: '✓ Deployed to production', tone: 'ok' },
+];
+
 const DEPLOYMENTS = [
   { id: '#182', sha: '77b2f3d', when: '8 days ago', status: 'Ready' },
   { id: '#181', sha: '4c19ba7', when: '9 days ago', status: 'Ready' },
@@ -318,42 +334,61 @@ function ResolvedCard({ onDeploy, onCancel }: { onDeploy: () => void; onCancel: 
   );
 }
 
-/** Figma "Logs-opened" (1069:7366). The terminal keeps its dark ground in both themes. */
-function BuildLogs() {
+/**
+ * Figma "Logs-opened" (1069:7366). The terminal keeps its dark ground in both
+ * themes; its header sits on Bg container, a step behind the card it is in.
+ *
+ * The lines are a prop because a finished deployment must not show the pause
+ * the blocked one ends on.
+ */
+function BuildLogs({ lines = LOG_LINES, live = true }: { lines?: LogLine[]; live?: boolean }) {
   return (
     <div className="flex w-full shrink-0 flex-col items-start overflow-clip rounded-main border border-border-main bg-bg-primary p-px">
-      <div className="flex w-full items-center justify-between border-b border-border-main px-[16px] pt-[10px] pb-[11px]">
+      <div className="flex w-full items-center justify-between border-b border-border-main bg-bg-container px-[16px] pt-[10px] pb-[11px]">
         <span className="text-h5 whitespace-nowrap text-text-primary">Build Logs</span>
         <span className="font-mono-code text-[10px] leading-[15px] whitespace-nowrap text-[#9aa1b1]">
           us-west-2 · node 22.x
         </span>
       </div>
-      <div className="h-[256px] w-full overflow-auto bg-terminal py-[7.5px]">
-        {LOG_LINES.map((line, index) => (
-          <div key={index} className="flex items-start gap-[12px] px-[16px]">
-            <span className="font-mono-code shrink-0 text-[11px] leading-[17.88px] text-terminal-line">
-              {String(index + 1).padStart(2, '0')}
-            </span>
-            <span
-              className={`font-mono-code text-[11px] leading-[17.88px] whitespace-pre ${
-                line.tone === 'command'
-                  ? 'text-white'
-                  : line.tone === 'ok'
-                    ? 'text-terminal-ok'
-                    : line.tone === 'warn'
-                      ? 'font-bold text-terminal-warn'
-                      : 'text-terminal-text'
-              }`}
-            >
-              {line.text}
-            </span>
-          </div>
-        ))}
-        {/* Blinking cursor at the tail of the stream. */}
+      <Terminal lines={lines} live={live} />
+    </div>
+  );
+}
+
+/**
+ * The stream itself, without the card around it. A deployment row is already a
+ * card with a header, so it embeds this directly rather than nesting a second
+ * one inside itself.
+ */
+function Terminal({ lines, live }: { lines: LogLine[]; live: boolean }) {
+  return (
+    <div className="h-[256px] w-full overflow-auto bg-terminal py-[7.5px]">
+      {lines.map((line, index) => (
+        <div key={index} className="flex items-start gap-[12px] px-[16px]">
+          <span className="font-mono-code shrink-0 text-[11px] leading-[17.88px] text-terminal-line">
+            {String(index + 1).padStart(2, '0')}
+          </span>
+          <span
+            className={`font-mono-code text-[11px] leading-[17.88px] whitespace-pre ${
+              line.tone === 'command'
+                ? 'text-white'
+                : line.tone === 'ok'
+                  ? 'text-terminal-ok'
+                  : line.tone === 'warn'
+                    ? 'font-bold text-terminal-warn'
+                    : 'text-terminal-text'
+            }`}
+          >
+            {line.text}
+          </span>
+        </div>
+      ))}
+      {/* The cursor only belongs on a stream that is still open. */}
+      {live && (
         <div className="px-[16px] pl-[48px]">
           <span aria-hidden className="mt-[2px] inline-block h-[12px] w-[6px] animate-pulse bg-terminal-text" />
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -433,28 +468,60 @@ function SettledDeployment() {
   );
 }
 
-/** Figma "Log section" (1069:7662) — one past deployment per row. */
+/**
+ * Figma "Log section" (1069:7662) — one past deployment per row.
+ *
+ * Each row is a disclosure: the chevron it already carried now turns, and the
+ * deployment's own logs open beneath it. Rows toggle independently so two can
+ * be compared side by side.
+ */
 function DeploymentRows() {
+  const [open, setOpen] = useState<string[]>([]);
+
+  const toggle = (id: string) =>
+    setOpen((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));
+
   return (
-    <div className="flex w-full shrink-0 flex-col items-start gap-[8px]">
-      {DEPLOYMENTS.map((deployment) => (
-        <div
-          key={deployment.id}
-          className="flex h-[32px] w-full shrink-0 items-center gap-[12px] rounded-main border border-border-main bg-bg-primary px-[17px] py-px"
-        >
-          <span className="shrink-0 text-text-secondary">
-            <Icon src={assets.logBranch} size={14} />
-          </span>
-          <span aria-hidden className="size-[6px] shrink-0 rounded-full bg-accent-green-text" />
-          <span className="text-h6 whitespace-nowrap text-text-primary">{deployment.id}</span>
-          <span className="text-small-title whitespace-nowrap text-text-secondary">{deployment.sha}</span>
-          <span className="min-w-px flex-1" />
-          <span className="text-small-title whitespace-nowrap text-text-secondary">{deployment.when}</span>
-          <span className="text-small-title w-[52px] text-right whitespace-nowrap text-accent-green-text">
-            {deployment.status}
-          </span>
-        </div>
-      ))}
+    <div className="flex w-full shrink-0 flex-col items-stretch gap-[8px]">
+      {DEPLOYMENTS.map((deployment) => {
+        const expanded = open.includes(deployment.id);
+        return (
+          <div
+            key={deployment.id}
+            className="flex w-full flex-col items-stretch overflow-hidden rounded-main border border-border-main bg-bg-primary"
+          >
+            <button
+              type="button"
+              aria-expanded={expanded}
+              onClick={() => toggle(deployment.id)}
+              className="flex h-[32px] w-full shrink-0 items-center gap-[12px] px-[17px] py-px text-left transition-colors hover:bg-hover"
+            >
+              <span className="shrink-0 text-text-secondary">
+                <Icon
+                  src={assets.chevron16}
+                  size={14}
+                  className={`transition-transform ${expanded ? 'rotate-0' : '-rotate-90'}`}
+                />
+              </span>
+              <span aria-hidden className="size-[6px] shrink-0 rounded-full bg-accent-green-text" />
+              <span className="text-h6 whitespace-nowrap text-text-primary">{deployment.id}</span>
+              <span className="text-small-title whitespace-nowrap text-text-secondary">{deployment.sha}</span>
+              <span className="min-w-px flex-1" />
+              <span className="text-small-title whitespace-nowrap text-text-secondary">{deployment.when}</span>
+              <span className="text-small-title w-[52px] text-right whitespace-nowrap text-text-selected">
+                {deployment.status}
+              </span>
+            </button>
+
+            {/* Inside the row's own card, so the header above it is the card's. */}
+            {expanded && (
+              <div className="w-full border-t border-border-main">
+                <Terminal lines={DONE_LINES} live={false} />
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

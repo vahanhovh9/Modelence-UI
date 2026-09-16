@@ -63,7 +63,7 @@ export function IconCta({
         type="button"
         aria-label={label}
         onClick={onClick}
-        className={`flex size-[26px] shrink-0 items-center justify-center rounded-full transition-colors ${
+        className={`flex size-[28px] shrink-0 items-center justify-center rounded-full transition-colors ${
           variant === 'primary'
             ? 'bg-button-primary-bg text-button-primary-text hover:opacity-90'
             : 'bg-button-secondary-bg text-button-secondary-text hover:bg-button-secondary-hover'
