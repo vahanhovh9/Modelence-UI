@@ -40,6 +40,8 @@ export const assets = {
   copy: '/assets/ds-copy.svg',
   connect: '/assets/ds-connect.svg',
   github: '/assets/ds-github.svg',
+  google: '/assets/ds-google.svg',
+  key: '/assets/ds-key.svg',
   history: '/assets/ds-history.svg',
   search: '/assets/ds-search.svg',
   close: '/assets/ds-close.svg',

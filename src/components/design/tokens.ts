@@ -74,6 +74,7 @@ export const COLOUR_GROUPS: Group[] = [
       'grey-900',
       'green-300',
       'green-800',
+      'purple-300',
       'purple-500',
       'purple-800',
       'brand',
