@@ -238,12 +238,27 @@ function MetricCard({
 
 /* ------------------------------------------------------------------ tables */
 
-/** The card the three counted tables sit in — the column header names it. */
-function TableCard({ min, children }: { min: string; children: React.ReactNode }) {
+/**
+ * Each counted table is a section in its own right: a heading naming what is
+ * being counted, and a card for the table to sit in. Three ruled blocks running
+ * one under another left the reader to work out where one ended and the next
+ * began, and the card is the same surface the charts above use, so the page
+ * reads as one stack of objects rather than two cards and then loose rules.
+ *
+ * The inset lives inside the scroller so it travels with the columns: a narrow
+ * pane scrolls the table rather than collapsing it, and padding left behind
+ * would let the first column slide under the card's edge.
+ */
+function TableCard({ title, min, children }: { title: string; min: string; children: React.ReactNode }) {
   return (
-    <div className="flex w-full min-w-px flex-col rounded-main border border-border-main bg-bg-primary px-[20px] pt-[2px] pb-[6px]">
-      <Scroller min={min}>{children}</Scroller>
-    </div>
+    <section className="flex w-full min-w-px flex-col gap-[12px]">
+      <h2 className="text-h3 text-text-selected">{title}</h2>
+      <div className="w-full overflow-clip rounded-main border border-border-main bg-bg-primary">
+        <Scroller min={min}>
+          <div className="px-[16px] py-[4px]">{children}</div>
+        </Scroller>
+      </div>
+    </section>
   );
 }
 
@@ -382,7 +397,7 @@ export function MonitoringView({ env = 'sandbox' }: { env?: Env }) {
 
   return (
     <TableSection title="Monitoring" actions={<Tab options={RANGES} value={range} onChange={setRange} />}>
-      <div className="flex w-full flex-col gap-[20px]">
+      <div className="flex w-full flex-col gap-[24px]">
         <section className="flex w-full flex-col gap-[12px]">
           <h2 className="text-h3 text-text-selected">System Metrics</h2>
           <div className="grid w-full grid-cols-1 gap-[12px] lg:grid-cols-2">
@@ -396,7 +411,7 @@ export function MonitoringView({ env = 'sandbox' }: { env?: Env }) {
           </div>
         </section>
 
-        <TableCard min="min-w-[700px]">
+        <TableCard title="Methods" min="min-w-[700px]">
           <TableHead>
             <HeadCell className="min-w-px flex-1">Method</HeadCell>
             <HeadCell className={COLS.perf}>Performance</HeadCell>
@@ -419,7 +434,7 @@ export function MonitoringView({ env = 'sandbox' }: { env?: Env }) {
           )}
         </TableCard>
 
-        <TableCard min="min-w-[1000px]">
+        <TableCard title="Cron Jobs" min="min-w-[1000px]">
           <TableHead>
             <HeadCell className="min-w-px flex-1">Cron Job</HeadCell>
             <HeadCell className={COLS.about}>Description</HeadCell>
@@ -449,7 +464,7 @@ export function MonitoringView({ env = 'sandbox' }: { env?: Env }) {
           ))}
         </TableCard>
 
-        <TableCard min="min-w-[700px]">
+        <TableCard title="Routes" min="min-w-[700px]">
           <TableHead>
             <HeadCell className="min-w-px flex-1">Route</HeadCell>
             <HeadCell className={COLS.perf}>Performance</HeadCell>

@@ -38,7 +38,7 @@ function TypeChip({ kind }: { kind: Config['kind'] }) {
   return (
     <span
       aria-label={kind}
-      className="flex size-[20px] shrink-0 items-center justify-center rounded-small bg-bg-selected-2 text-[11px] font-semibold text-text-secondary"
+      className="text-h6 flex size-[20px] shrink-0 items-center justify-center rounded-small bg-bg-selected-2 text-text-secondary"
     >
       {kind === 'number' ? '#' : 'T'}
     </span>

@@ -90,17 +90,26 @@ export function Scroller({ min, children }: { min: string; children: ReactNode }
   );
 }
 
+/*
+ * Both rows are a fixed height rather than one implied by their padding, so
+ * every table in the console keeps the same rhythm whatever a cell happens to
+ * hold — a bare date, a 20px chip or a glyph and a label.
+ */
 export function TableHead({ children }: { children: ReactNode }) {
-  return <div className="flex items-center gap-[16px] border-b border-border-main py-[10px]">{children}</div>;
+  return (
+    <div className="flex h-[36px] items-center gap-[16px] border-b border-border-main py-[10px]">{children}</div>
+  );
 }
 
 export function HeadCell({ className = '', children }: { className?: string; children: ReactNode }) {
-  return <span className={`text-h6 text-text-selected ${className}`}>{children}</span>;
+  return (
+    <span className={`text-h6 flex items-center overflow-hidden text-text-selected ${className}`}>{children}</span>
+  );
 }
 
 export function TableRow({ children }: { children: ReactNode }) {
   return (
-    <div className="flex items-center gap-[16px] border-b border-border-secondary py-[11px] transition-colors last:border-b-0 hover:text-text-selected">
+    <div className="flex h-[48px] items-center gap-[16px] border-b border-border-secondary py-[11px] transition-colors last:border-b-0 hover:text-text-selected">
       {children}
     </div>
   );

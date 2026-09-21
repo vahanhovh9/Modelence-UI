@@ -269,7 +269,8 @@ export function UsersView({ env = 'sandbox' }: { env?: Env }) {
               </span>
             </span>
 
-            <span className="text-body min-w-px flex-1 truncate font-semibold text-text-primary">{user.handle}</span>
+            {/* The handle is the row's subject, so it takes H5 — medium, not bold. */}
+            <span className="text-h5 min-w-px flex-1 truncate text-text-primary">{user.handle}</span>
 
             <span className="text-body min-w-px flex-1 truncate text-text-main" title={user.email}>
               {user.email}
@@ -303,7 +304,7 @@ export function UsersView({ env = 'sandbox' }: { env?: Env }) {
               {user.roles.length > 0 ? (
                 <span className="text-body truncate text-text-main">{user.roles.join(', ')}</span>
               ) : (
-                <span className="text-body text-text-secondary italic">No roles</span>
+                <span className="text-body text-text-secondary">No roles</span>
               )}
             </span>
 
